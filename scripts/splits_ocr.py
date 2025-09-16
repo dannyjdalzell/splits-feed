@@ -1,7 +1,7 @@
 # scripts/splits_ocr.py
 # ------------------------------------------------------------
 # OCR → parse tweet screenshots (grid & BetMGM gold tables)
-# Writes/updates splits.csv at repo root.
+# Writes/updates splits.csv at repo root, with LEAGUE inferred.
 # ------------------------------------------------------------
 
 import os, re, csv
@@ -22,26 +22,45 @@ FIELDNAMES = [
 
 # ---------- small utils ----------
 def now_ts() -> str:
-    # ISO without TZ (GitHub runners are UTC)
     return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
 
-def preprocess(img: Image.Image) -> Image.Image:
-    # robust-ish prep for screenshots
+def preprocess(img):
     g = ImageOps.grayscale(img)
     g = ImageOps.autocontrast(g)
     g = g.filter(ImageFilter.SHARPEN)
     return g
 
-def ocr_best(img: Image.Image):
-    # Try several PSMs; pick the one with most "bets/handle/%/+/-/digits"
+def ocr_best(img):
     cands = []
     for psm in (6, 4, 11):
         cfg = f'--oem 3 --psm {psm}'
         txt = pytesseract.image_to_string(img, lang="eng", config=cfg)
-        score = len(re.findall(r"(bets?|handle|%|[+-]\d{2,3}|\d{1,3}\s?%)", txt, flags=re.I))
+        score = len(re.findall(r"(bets?|handle|%|[+-]\d{2,3}|\d{1,2}\.5|\d{1,3}\s?%)", txt, flags=re.I))
         cands.append((score, psm, txt))
     cands.sort(reverse=True)
     return cands[0]  # (score, psm, text)
+
+# ---------- league inference ----------
+NFL_WORDS  = {"nfl","week","spread","total","moneyline","chargers","raiders","cowboys","patriots","packers","chiefs","steelers","jets","giants","vikings","browns","bears","eagles","saints","lions"}
+MLB_WORDS  = {"mlb","mlb games","moneyline","run line","yankees","dodgers","braves","rays","cardinals","cubs","reds","astros","giants","phillies","nationals","blue jays","rays","orioles"}
+NCAAF_WORDS= {"college football","cfb","ncaaf","week","alabama","georgia","clemson","ohio state","texas","usc","notre dame","tennessee","oregon","michigan","florida state"}
+
+def infer_league(text: str, filename: str) -> str:
+    t = f"{filename.lower()} {text.lower()}"
+    # strong headers
+    if re.search(r"\bMLB\b|\bMLB Games\b", t): return "MLB"
+    if re.search(r"\bCollege Football\b|\bCFB\b|\bNCAAF\b", t): return "NCAAF"
+    if re.search(r"\bNFL\b|\bNFL Week\b", t): return "NFL"
+    # keyword hits
+    if sum(1 for w in MLB_WORDS   if w in t) >= 2: return "MLB"
+    if sum(1 for w in NCAAF_WORDS if w in t) >= 2: return "NCAAF"
+    if sum(1 for w in NFL_WORDS   if w in t) >= 2: return "NFL"
+    # folder hint (optional: images/nfl, images/mlb, images/cfb)
+    p = Path(filename).as_posix().lower()
+    if "/nfl/" in p: return "NFL"
+    if "/mlb/" in p: return "MLB"
+    if "/cfb/" in p or "/ncaaf/" in p or "/college/" in p: return "NCAAF"
+    return "Unknown"
 
 # ---------- team-name sanitizer ----------
 TEAM_JUNK = re.compile(r"\s*(?:[-+]?(\d+(?:\.\d+)?)\b|O|U)\s*")
@@ -54,52 +73,31 @@ def clean_team_name(s: str) -> str:
 
 # ---------- parsers ----------
 TEAM_LINE = re.compile(
-    r"""  # A line that likely contains a team + some numeric cells
-    ^\s*([A-Za-z0-9\.\'\-\&\s]+?)\s+           # team-ish text
-    (?:(?:[+\-]?\d+(?:\.\d+)?)\s*)?            # optional spread/total token nearby
-    (?:
-        (\d{1,3})\s*%.*?(\d{1,3})\s*%          # two % figures (bets / handle OR handle / bets)
-    )
-    .*?$""",
+    r"""^\s*([A-Za-z0-9\.\'\-\&\s]+?)\s+(?:(?:[+\-]?\d+(?:\.\d+)?)\s*)?
+        (?:(\d{1,3})\s*%.*?(\d{1,3})\s*%)""",
     re.I | re.X,
 )
 
-ML_SIG = re.compile(r"([+-]\d{2,3})")
-SP_SIG = re.compile(r"([+-]\d+(?:\.\d+)?)")
+ML_SIG  = re.compile(r"([+-]\d{2,3})")
+SP_SIG  = re.compile(r"([+-]\d+(?:\.\d+)?)")
 TOT_SIG = re.compile(r"\b(\d{1,2}\.5|\d{1,2})\b")
 
-def parse_grid_blocks(text: str):
-    """
-    Generic 'grid' (Covers/Action/ESPN) two-line row pairs.
-    Returns list of row dicts for ML/Spread/Total where we have %s.
-    """
+def parse_grid_blocks(text: str, league_hint: str):
     rows = []
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-
-    # Heuristic: build records with team + bets%/handle% and nearby line tokens per row,
-    # then pair (away, home) sequentially.
     recs = []
     for ln in lines:
         m = TEAM_LINE.search(ln)
-        if not m:
+        if not m: 
             continue
         team = m.group(1).strip()
-        # try to find which order the percents appeared; we’ll normalize later
-        percents = re.findall(r"(\d{1,3})\s*%", ln)
+        perc = re.findall(r"(\d{1,3})\s*%", ln)
         bets = handle = None
-        if len(percents) >= 2:
-            # many grids arrange: Handle … Bets (or vice versa). We cannot be sure.
-            # Use the first two as (bets, handle) but later we’ll flip if “bets > handle and label implies Handle”
-            # Since we don’t have labels per-line, keep the simple assumption.
-            p1, p2 = percents[0], percents[1]
-            bets = int(p1)
-            handle = int(p2)
-
-        # Line signals (moneyline/spread/total) – might or might not appear on the same row
-        ml = ML_SIG.search(ln)
-        sp = SP_SIG.search(ln)
+        if len(perc) >= 2:
+            bets, handle = int(perc[0]), int(perc[1])
+        ml  = ML_SIG.search(ln)
+        sp  = SP_SIG.search(ln)
         tot = TOT_SIG.search(ln)
-
         recs.append({
             "team": team,
             "bets": bets, "handle": handle,
@@ -108,87 +106,51 @@ def parse_grid_blocks(text: str):
             "tot": tot.group(1) if tot else "",
         })
 
-    # Pair as (away, home)
     for i in range(0, len(recs) - 1, 2):
-        away = recs[i]
-        home = recs[i+1]
+        away, home = recs[i], recs[i+1]
         ts = now_ts()
-        league = "Unknown"  # we can refine separately if needed
+        league = league_hint or "Unknown"
         src = "GRID_OCR"
 
-        # Moneyline
-        if away["bets"] is not None and home["bets"] is not None:
-            # Prefer to take the %s from the favorite row for ML (but grids vary),
-            # keep it simple: use home’s %s (consistently on many feeds).
+        def addrow(market, line):
+            if away["bets"] is None or home["bets"] is None: 
+                return
             rows.append({
                 "timestamp": ts, "league": league,
                 "away_team": away["team"], "home_team": home["team"],
-                "market": "ML",
-                "tickets_pct": home["bets"] if home["bets"] is not None else 0,
+                "market": market,
+                "tickets_pct": home["bets"],
                 "handle_pct": home["handle"] if home["handle"] is not None else 0,
-                "line": home["ml"] or away["ml"],
+                "line": line or "",
                 "source": src,
             })
 
-        # Spread
-        if away["bets"] is not None and home["bets"] is not None:
-            rows.append({
-                "timestamp": ts, "league": league,
-                "away_team": away["team"], "home_team": home["team"],
-                "market": "Spread",
-                "tickets_pct": home["bets"] if home["bets"] is not None else 0,
-                "handle_pct": home["handle"] if home["handle"] is not None else 0,
-                "line": home["sp"] or away["sp"],
-                "source": src,
-            })
-
-        # Total
-        if away["bets"] is not None and home["bets"] is not None:
-            ln = home["tot"] or away["tot"]
-            rows.append({
-                "timestamp": ts, "league": league,
-                "away_team": away["team"], "home_team": home["team"],
-                "market": "Total",
-                "tickets_pct": home["bets"] if home["bets"] is not None else 0,
-                "handle_pct": home["handle"] if home["handle"] is not None else 0,
-                "line": ln,
-                "source": src,
-            })
+        addrow("ML",     home["ml"]  or away["ml"])
+        addrow("Spread", home["sp"]  or away["sp"])
+        addrow("Total",  home["tot"] or away["tot"])
 
     return rows
 
-def parse_mgm_gold(text: str):
-    """
-    BetMGM gold table (MLB Games / College Football Week …).
-    We scan for lines that look like 'Team A at Team B' and then
-    fish % and line tokens that follow on the same or nearby lines.
-    """
+def parse_mgm_gold(text: str, league_hint: str):
     rows = []
     tlines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-    league = "Unknown"
-    if re.search(r"\bMLB\b", text, re.I): league = "MLB"
-    if re.search(r"\bCollege Football\b|\bCFB\b", text, re.I): league = "NCAAF"
-    if re.search(r"\bNFL\b", text, re.I): league = "NFL"
+    league = league_hint or ("MLB" if re.search(r"\bMLB\b", text, re.I) else
+                             "NCAAF" if re.search(r"\bCollege Football\b|\bCFB\b", text, re.I) else
+                             "NFL" if re.search(r"\bNFL\b", text, re.I) else
+                             "Unknown")
 
-    # Find matchups "X at Y"
     for idx, ln in enumerate(tlines):
         m = re.search(r"([A-Za-z0-9\.\'\-\&\s]+)\s+at\s+([A-Za-z0-9\.\'\-\&\s]+)", ln, re.I)
-        if not m:
+        if not m: 
             continue
-        away_name = m.group(1).strip()
-        home_name = m.group(2).strip()
-
-        window = "\n".join(tlines[idx: idx+4])  # small context window
-        # Pull bets/handle for ML/Spread/Total if present
-        # These tables usually show three columns of %s (we’ll reuse the same %s across markets if needed).
+        away_name, home_name = m.group(1).strip(), m.group(2).strip()
+        window = "\n".join(tlines[idx: idx+4])
         pc = re.findall(r"(\d{1,3})\s*%", window)
         bets = handle = None
         if len(pc) >= 2:
-            # BetMGM layout typically shows %Bets then %Handle together
-            bets = int(pc[0]); handle = int(pc[1])
-
-        ml = ML_SIG.search(window)
-        sp = SP_SIG.search(window)
+            bets, handle = int(pc[0]), int(pc[1])
+        ml  = ML_SIG.search(window)
+        sp  = SP_SIG.search(window)
         tot = TOT_SIG.search(window)
 
         ts = now_ts()
@@ -205,22 +167,27 @@ def parse_mgm_gold(text: str):
                 "source": src,
             })
 
-        addrow("ML", ml.group(1) if ml else "")
-        addrow("Spread", sp.group(1) if sp else "")
-        addrow("Total", tot.group(1) if tot else "")
+        addrow("ML",     ml.group(1)  if ml  else "")
+        addrow("Spread", sp.group(1)  if sp  else "")
+        addrow("Total",  tot.group(1) if tot else "")
 
     return rows
 
-def parse_blocks(text: str):
-    # try both patterns; union unique rows (by tuple)
+def parse_blocks(text: str, filename: str):
+    league = infer_league(text, filename)
     out = []
-    for block in (parse_grid_blocks(text), parse_mgm_gold(text)):
-        out.extend(block)
+    out += parse_grid_blocks(text, league)
+    out += parse_mgm_gold(text, league)
 
-    # Deduplicate by signature
-    seen = set()
-    uniq = []
+    # Dedup + clean team names + drop obvious junk
+    seen, uniq = set(), []
     for r in out:
+        r["away_team"] = clean_team_name(r.get("away_team", ""))
+        r["home_team"] = clean_team_name(r.get("home_team", ""))
+        if not r["away_team"] or not r["home_team"]:
+            continue
+        if re.search(r"\d", r["away_team"]) or re.search(r"\d", r["home_team"]):
+            continue
         sig = (r["league"], r["away_team"], r["home_team"], r["market"], r["line"], r["source"])
         if sig in seen: 
             continue
@@ -231,14 +198,13 @@ def parse_blocks(text: str):
 # ---------- main ----------
 def main():
     all_rows = []
-
     if not IN_DIR.exists():
         print(f"[WARN] images/ not found at: {IN_DIR}")
         return
 
     img_files = []
     for ext in (".png", ".jpg", ".jpeg", ".webp"):
-        img_files.extend(sorted(p for p in IN_DIR.glob(f"*{ext}")))
+        img_files.extend(sorted(IN_DIR.glob(f"*{ext}")))
     if not img_files:
         print("[INFO] No images to process.")
         return
@@ -252,21 +218,11 @@ def main():
 
         pim = preprocess(img)
         score, psm, txt = ocr_best(pim)
-        rows = parse_blocks(txt)
+        rows = parse_blocks(txt, path.name)
 
-        # Clean & filter before accumulating
-        cleaned = []
-        for r in rows:
-            r["away_team"] = clean_team_name(r.get("away_team", ""))
-            r["home_team"] = clean_team_name(r.get("home_team", ""))
-            # drop if team fields still have digits (clearly not a name)
-            if re.search(r"\d", r["away_team"]) or re.search(r"\d", r["home_team"]):
-                continue
-            cleaned.append(r)
-
-        if cleaned:
-            print(f"[OK] {path.name}: {len(cleaned)} row(s)")
-            all_rows += cleaned
+        if rows:
+            print(f"[OK] {path.name}: {len(rows)} row(s) (psm={psm}, score={score})")
+            all_rows += rows
         else:
             print(f"[WARN] No rows parsed from: {path.name}")
 
@@ -274,7 +230,6 @@ def main():
         print("No valid rows parsed from any image.")
         return
 
-    # Append to CSV (create header if missing)
     exists = OUT_FILE.exists()
     with OUT_FILE.open("a", newline="") as f:
         w = csv.DictWriter(f, fieldnames=FIELDNAMES)
