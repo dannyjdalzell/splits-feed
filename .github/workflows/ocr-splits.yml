@@ -3,15 +3,12 @@ name: OCR Splits
 on:
   push:
     branches: [ main ]
-    # Run only when new screenshots or the OCR code/workflow change
     paths:
       - 'images/**'
       - 'scripts/**'
       - '.github/workflows/ocr-splits.yml'
-    # Never re-trigger just because splits.csv was written by the bot
-    paths-ignore:
-      - 'splits.csv'
   workflow_dispatch:
+
 
 permissions:
   contents: write
