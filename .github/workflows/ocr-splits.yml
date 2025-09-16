@@ -2,21 +2,18 @@ name: OCR Splits
 
 on:
   push:
-    branches: [ main ]
     paths:
       - 'images/**'
       - 'scripts/**'
       - '.github/workflows/ocr-splits.yml'
   workflow_dispatch:
-schedule:
-    - cron: "*/15 * * * *"   # every 15 minutes
 
 permissions:
   contents: write
 
 concurrency:
-  group: ocr-splits-main
-  cancel-in-progress: true
+  group: ocr-splits-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   ocr:
@@ -25,37 +22,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install Tesseract
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tesseract-ocr
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      - name: Install system deps (Tesseract)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr
+          tesseract --version
+
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          pip install pillow pytesseract pandas
+          # Core OCR + data handling; add any extras your script imports.
+          pip install pillow pytesseract opencv-python-headless python-dateutil pandas
 
-      - name: Run OCR script
-        run: python scripts/splits_ocr.py
-
-      - name: Commit splits.csv (if changed)
+      - name: Run OCR on new/changed images
         run: |
-          git config user.name  "splits-bot"
-          git config user.email "splits-bot@users.noreply.github.com"
+          python scripts/splits_ocr.py
 
-          # only commit if the file actually changed
-          if ! git diff --quiet -- splits.csv; then
-            git add splits.csv
-            # [skip ci] prevents spawning another run even if paths change later
-            git commit -m "update splits.csv [skip ci]"
-            git pull --rebase origin ${{ github.ref_name }} || true
-            git push origin HEAD:${{ github.ref_name }}
+      - name: Commit splits.csv (skip ci if committing)
+        run: |
+          git config user.email "bot@local"
+          git config user.name "splits-bot"
+          git pull --rebase
+          git add splits.csv
+          if ! git diff --cached --quiet; then
+            git commit -m "[skip ci] update splits.csv"
+            git push
           else
-            echo "No changes in splits.csv — skipping commit."
+            echo "No updates to splits.csv; skipping commit."
           fi
