@@ -1,4 +1,3 @@
-cat > scripts/splits_ocr.py <<'PY'
 #!/usr/bin/env python3
 import os, sys, re, csv, datetime
 from pathlib import Path
@@ -48,11 +47,9 @@ def infer_league(text:str)->str:
     txt = text.lower()
     hits = [TEAM_MAP[t] for t in TEAM_MAP if t.lower() in txt]
     if not hits: return "Unknown"
-    # pick the league that appears most
     return max(set(hits), key=hits.count)
 
 def find_two_teams(text:str):
-    # return first two distinct team names seen in any league list
     seen = []
     for t in TEAM_MAP:
         if re.search(rf"\b{re.escape(t)}\b", text, flags=re.I):
@@ -60,7 +57,6 @@ def find_two_teams(text:str):
                 seen.append(t)
             if len(seen)==2: break
     if len(seen)<2:
-        # also try simple "X vs Y" pattern as fallback
         m = re.search(r"([A-Za-z .'-]{2,})\s+(?:vs|at)\s+([A-Za-z .'-]{2,})", text, flags=re.I)
         if m:
             return m.group(1).strip(), m.group(2).strip()
@@ -76,7 +72,6 @@ def pct_or_blank(s:str):
     return str(val)
 
 def extract_line(text:str):
-    # try to find a moneyline like -135 or +110 or a spread/total like 7.5 / 221.5
     m = re.search(r"([+-]?\d{1,3}(?:\.\d)?)\s*(?:ML|Moneyline)?", text)
     return m.group(1) if m else ""
 
@@ -84,7 +79,6 @@ def detect_source(text:str)->str:
     return "Pregame" if "pregame" in text.lower() else "Unknown"
 
 def detect_market(text:str)->str:
-    # look for hints
     t = text.lower()
     if "ml" in t or "moneyline" in t: return "ML"
     if "spread" in t or re.search(r"[+-]\d+(\.\d)?", t): return "Spread"
@@ -104,20 +98,15 @@ def ocr_text(image_path:Path)->str:
         return ""
 
 def parse_pregame(text:str):
-    # Expect a consensus-style table; we’ll pull two teams + best-guess percentages.
     away, home = find_two_teams(text)
     if not away or not home:
         return None
-
-    # grab two percentages in order; if there are more, take first 2 as tickets/handle
     pcts = re.findall(r"(\d{1,3})\s*%", text)
     tickets = pct_or_blank(pcts[0]) if len(pcts)>=1 else ""
     handle  = pct_or_blank(pcts[1]) if len(pcts)>=2 else ""
-
     league = infer_league(text)
     market = detect_market(text)
     line   = extract_line(text)
-
     return {
         "timestamp":  datetime.datetime.utcnow().replace(microsecond=0).isoformat()+"+00:00",
         "league":     league,
@@ -131,7 +120,6 @@ def parse_pregame(text:str):
     }
 
 def parse_generic(text:str):
-    # Fallback: try to salvage two teams and mark Unknown market/source
     away, home = find_two_teams(text)
     if not away or not home:
         return None
@@ -156,7 +144,6 @@ def ensure_csv(path:Path):
 
 def append_row(row:dict):
     ensure_csv(CSV_PATH)
-    # strictly keep only the 9 fields
     reduced = {k: row.get(k, "") for k in CSV_FIELDS}
     with open(CSV_PATH, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=CSV_FIELDS)
@@ -167,15 +154,13 @@ def handle_image(p:Path):
     if not txt.strip():
         print(f"[SKIP] Empty OCR for {p.name}")
         return
-    # Parser selection
     row = None
     if "pregame" in txt.lower():
         row = parse_pregame(txt)
     if row is None:
-        row = parse_pregame(txt)  # still try pregame heuristics
+        row = parse_pregame(txt)
     if row is None:
         row = parse_generic(txt)
-
     if row is None:
         print(f"[SKIP] Unrecognized layout: {p.name}")
         return
@@ -194,9 +179,7 @@ def main():
         try:
             handle_image(p)
         except Exception as e:
-            # never crash the CI
             print(f"[ERROR] {p.name}: {e}", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
-PY
