@@ -2,10 +2,15 @@ name: OCR Splits
 
 on:
   push:
+    branches: [ main ]
+    # Run only when new screenshots or the OCR code/workflow change
     paths:
-      - "images/**"
-      - "scripts/**"
-      - ".github/workflows/ocr-splits.yml"
+      - 'images/**'
+      - 'scripts/**'
+      - '.github/workflows/ocr-splits.yml'
+    # Never re-trigger just because splits.csv was written by the bot
+    paths-ignore:
+      - 'splits.csv'
   workflow_dispatch:
 
 permissions:
@@ -18,11 +23,10 @@ concurrency:
 jobs:
   ocr:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install Tesseract
         run: |
@@ -32,12 +36,12 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          pip install pillow pytesseract
+          pip install pillow pytesseract pandas
 
       - name: Run OCR script
         run: python scripts/splits_ocr.py
@@ -47,12 +51,13 @@ jobs:
           git config user.name  "splits-bot"
           git config user.email "splits-bot@users.noreply.github.com"
 
+          # only commit if the file actually changed
           if ! git diff --quiet -- splits.csv; then
             git add splits.csv
-            git commit -m "update splits.csv [ci]"
-            git fetch origin main
-            git pull --rebase origin main
-            git push origin HEAD:main || git push --force-with-lease origin HEAD:main
+            # [skip ci] prevents spawning another run even if paths change later
+            git commit -m "update splits.csv [skip ci]"
+            git pull --rebase origin ${{ github.ref_name }} || true
+            git push origin HEAD:${{ github.ref_name }}
           else
             echo "No changes in splits.csv — skipping commit."
           fi
