@@ -2483,3 +2483,284 @@ timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source
 2025-09-16T01:06:32+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,ML,27,68,,COVERS_FAM
 2025-09-16T01:06:32+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,Spread,27,68,,COVERS_FAM
 2025-09-16T01:06:32+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,Total,27,68,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Chicago Cubs at 135 -120,Pittsburgh Pirates 115 100,ML,34,11,+115,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Chicago Cubs at 135 -120,Pittsburgh Pirates 115 100,Spread,34,11,+115,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Atlanta Braves at 155 165,Washington Nationals 130 140,ML,50,29,+130,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Atlanta Braves at 155 165,Washington Nationals 130 140,Spread,50,29,+130,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Toronto Blue Jays at -125 -135,Tampa Bay Rays 105 110,ML,24,35,+105,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Toronto Blue Jays at -125 -135,Tampa Bay Rays 105 110,Spread,24,35,+105,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Baltimore Orioles at -145 -145,Chicago White Sox 125 120,ML,37,32,+125,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Baltimore Orioles at -145 -145,Chicago White Sox 125 120,Spread,37,32,+125,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,New York Yankees at -190 -190,Minnesota Twins 155 155,ML,22,12,+155,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,New York Yankees at -190 -190,Minnesota Twins 155 155,Spread,22,12,+155,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Cincinnati Reds at 110 -105,St.Louis Cardinals -125 1145,ML,32,21,-125,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Cincinnati Reds at 110 -105,St.Louis Cardinals -125 1145,Spread,32,21,-125,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Texas Rangers at 105 110,Houston Astros -125 -130,ML,50,35,-125,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Texas Rangers at 105 110,Houston Astros -125 -130,Spread,50,35,-125,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,San Francisco Giants at 120 115,Arizona Diamondbacks -140 -135,ML,60,44,-140,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,San Francisco Giants at 120 115,Arizona Diamondbacks -140 -135,Spread,60,44,-140,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Philadelphia Phillies at 115 100,Los Angeles Dodgers -135 -120,ML,35,19,-135,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Philadelphia Phillies at 115 100,Los Angeles Dodgers -135 -120,Spread,35,19,-135,MGM_FAM
+2025-09-16T01:29:31+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,ML,16,22,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,Spread,16,22,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,Total,16,22,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Atlanta Braves at,Washington Nationals,ML,31,38,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Atlanta Braves at,Washington Nationals,Spread,31,38,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Atlanta Braves at,Washington Nationals,Total,31,38,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,ML,26,23,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,Spread,26,23,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,Total,26,23,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,ML,8,20,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,Spread,8,20,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,Total,8,20,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,New York Yankees at,Minnesota Twins,ML,2,7,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,New York Yankees at,Minnesota Twins,Spread,2,7,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,New York Yankees at,Minnesota Twins,Total,2,7,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Cincinnati Reds at,St.Louis Cardinals,ML,57,45,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Cincinnati Reds at,St.Louis Cardinals,Spread,57,45,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Cincinnati Reds at,St.Louis Cardinals,Total,57,45,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Texas Rangers at,Houston Astros,ML,76,75,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Texas Rangers at,Houston Astros,Spread,76,75,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Texas Rangers at,Houston Astros,Total,76,75,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,San Francisco Giants at,Arizona Diamondbacks,ML,89,82,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,San Francisco Giants at,Arizona Diamondbacks,Spread,89,82,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,San Francisco Giants at,Arizona Diamondbacks,Total,89,82,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,ML,9,48,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,Spread,9,48,,COVERS_FAM
+2025-09-16T01:29:31+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,Total,9,48,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Chicago Cubs at -135 -120,Pittsburgh Pirates 115 100,ML,34,11,+115,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Chicago Cubs at -135 -120,Pittsburgh Pirates 115 100,Spread,34,11,+115,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Atlanta Braves at -155 -165,Washington Nationals 130 140,ML,50,29,+130,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Atlanta Braves at -155 -165,Washington Nationals 130 140,Spread,50,29,+130,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Toronto Blue Jays at -125 -135,Tampa Bay Rays 105 110,ML,24,35,+105,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Toronto Blue Jays at -125 -135,Tampa Bay Rays 105 110,Spread,24,35,+105,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Baltimore Orioles at -145 -145,Chicago White Sox 125 120,ML,37,32,+125,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Baltimore Orioles at -145 -145,Chicago White Sox 125 120,Spread,37,32,+125,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,New York Yankees at -190 -190,Minnesota Twins 155 155,ML,22,12,+155,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,New York Yankees at -190 -190,Minnesota Twins 155 155,Spread,22,12,+155,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Cincinnati Reds at 110 -105,St. Louis Cardinals -125 -115,ML,32,21,-125,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Cincinnati Reds at 110 -105,St. Louis Cardinals -125 -115,Spread,32,21,-125,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Philadelphia Phillies at 115 100,Los Angeles Dodgers -135 -120,ML,35,19,-135,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Philadelphia Phillies at 115 100,Los Angeles Dodgers -135 -120,Spread,35,19,-135,MGM_FAM
+2025-09-16T01:29:37+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,ML,16,22,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,Spread,16,22,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,Total,16,22,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Atlanta Braves at,Washington Nationals,ML,31,38,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Atlanta Braves at,Washington Nationals,Spread,31,38,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Atlanta Braves at,Washington Nationals,Total,31,38,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,ML,26,23,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,Spread,26,23,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,Total,26,23,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,ML,8,20,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,Spread,8,20,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,Total,8,20,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,New York Yankees at,Minnesota Twins,ML,2,22,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,New York Yankees at,Minnesota Twins,Spread,2,22,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,New York Yankees at,Minnesota Twins,Total,2,22,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Cincinnati Reds at,St. Louis Cardinals,ML,51,45,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Cincinnati Reds at,St. Louis Cardinals,Spread,51,45,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Cincinnati Reds at,St. Louis Cardinals,Total,51,45,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,ML,9,48,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,Spread,9,48,,COVERS_FAM
+2025-09-16T01:29:37+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,Total,9,48,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Chicago Cubs at -135 -120,Pittsburgh Pirates 115 100,ML,34,11,+115,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Chicago Cubs at -135 -120,Pittsburgh Pirates 115 100,Spread,34,11,+115,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Atlanta Braves at -155 -165,Washington Nationals 130 140,ML,50,29,+130,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Atlanta Braves at -155 -165,Washington Nationals 130 140,Spread,50,29,+130,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Toronto Blue Jays at -125 -135,Tampa Bay Rays 105 110,ML,24,35,+105,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Toronto Blue Jays at -125 -135,Tampa Bay Rays 105 110,Spread,24,35,+105,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Baltimore Orioles at -145 -145,Chicago White Sox 125 120,ML,37,32,+125,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Baltimore Orioles at -145 -145,Chicago White Sox 125 120,Spread,37,32,+125,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,New York Yankees at -190 -190,Minnesota Twins 155 155,ML,22,12,+155,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,New York Yankees at -190 -190,Minnesota Twins 155 155,Spread,22,12,+155,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Cincinnati Reds at 110 -105,St. Louis Cardinals -125 -115,ML,32,21,-125,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Cincinnati Reds at 110 -105,St. Louis Cardinals -125 -115,Spread,32,21,-125,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Philadelphia Phillies at 115 100,Los Angeles Dodgers -135 -120,ML,35,19,-135,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Philadelphia Phillies at 115 100,Los Angeles Dodgers -135 -120,Spread,35,19,-135,MGM_FAM
+2025-09-16T01:29:44+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,ML,16,22,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,Spread,16,22,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Chicago Cubs at,Pittsburgh Pirates,Total,16,22,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Atlanta Braves at,Washington Nationals,ML,31,38,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Atlanta Braves at,Washington Nationals,Spread,31,38,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Atlanta Braves at,Washington Nationals,Total,31,38,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,ML,26,23,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,Spread,26,23,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Toronto Blue Jays at,Tampa Bay Rays,Total,26,23,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,ML,8,20,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,Spread,8,20,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Baltimore Orioles at,Chicago White Sox,Total,8,20,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,New York Yankees at,Minnesota Twins,ML,2,22,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,New York Yankees at,Minnesota Twins,Spread,2,22,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,New York Yankees at,Minnesota Twins,Total,2,22,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Cincinnati Reds at,St. Louis Cardinals,ML,51,45,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Cincinnati Reds at,St. Louis Cardinals,Spread,51,45,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Cincinnati Reds at,St. Louis Cardinals,Total,51,45,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,ML,9,48,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,Spread,9,48,,COVERS_FAM
+2025-09-16T01:29:44+00:00,Unknown,Philadelphia Phillies at,Los Angeles Dodgers,Total,9,48,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,4 Tampa Bay Buccaneers 25,v Houston Texans -25,ML,47,40,-25,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,4 Tampa Bay Buccaneers 25,v Houston Texans -25,Spread,47,40,-25,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,C Chicago Cubs 17,P Pittsburgh Pirates 105,ML,9,18,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,C Chicago Cubs 17,P Pittsburgh Pirates 105,Spread,9,18,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Toronto Blue Jays -126,Tp Tampa Bay Rays 3,ML,42,31,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Toronto Blue Jays -126,Tp Tampa Bay Rays 3,Spread,42,31,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Baltimore Orioles -135,4 Chicago White Sox 121,ML,90,43,-135,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Baltimore Orioles -135,4 Chicago White Sox 121,Spread,90,43,-135,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,1 New York Yankees 190,Minnesota Twins 170,ML,2,22,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,1 New York Yankees 190,Minnesota Twins 170,Spread,2,22,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Cincinnati Reds -106,ST Louis Cardinals -106,ML,5,40,-106,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Cincinnati Reds -106,ST Louis Cardinals -106,Spread,5,40,-106,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,il Texas Rangers 12,Houston Astros -125,ML,70,42,-125,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,il Texas Rangers 12,Houston Astros -125,Spread,70,42,-125,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,San Francisco Giants 15,A Arizona Diamondbacks 128,ML,30,56,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,San Francisco Giants 15,A Arizona Diamondbacks 128,Spread,30,56,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Philadelphia Phillies 105,ty Los Angeles Dodgers 07,ML,12,38,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,Philadelphia Phillies 105,ty Los Angeles Dodgers 07,Spread,12,38,+15,MGM_FAM
+2025-09-16T01:29:48+00:00,Unknown,v Houston Texans,rs Los Angeles Chargers,ML,27,78,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,v Houston Texans,rs Los Angeles Chargers,Spread,27,78,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,v Houston Texans,rs Los Angeles Chargers,Total,27,78,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,C Chicago Cubs,P Pittsburgh Pirates,ML,33,23,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,C Chicago Cubs,P Pittsburgh Pirates,Spread,33,23,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,C Chicago Cubs,P Pittsburgh Pirates,Total,33,23,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,A Atlanta Braves,Tp Tampa Bay Rays,ML,0,0,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,A Atlanta Braves,Tp Tampa Bay Rays,Spread,0,0,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,A Atlanta Braves,Tp Tampa Bay Rays,Total,0,0,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,ML,50,50,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,Spread,50,50,,COVERS_FAM
+2025-09-16T01:29:48+00:00,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,Total,50,50,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Bengals 3.5 -3.5 70,7.5 -5.5 77,ML,3,5,-290,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Bengals 3.5 -3.5 70,7.5 -5.5 77,Spread,3,5,-5.5,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Jets 7.5 5.5 22,Steelers -25 -3.5 74,ML,4,7,-25,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Jets 7.5 5.5 22,Steelers -25 -3.5 74,Spread,4,7,-25,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Bears 5.5 6.5 38,Lions s -6.5 61,ML,9,1,-300,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Bears 5.5 6.5 38,Lions s -6.5 61,Spread,9,1,-6.5,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Cowboys zi 5.5 84,Dolphins Ai -1.5 39,ML,4,9,-130,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Cowboys zi 5.5 84,Dolphins Ai -1.5 39,Spread,4,9,-1.5,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Ravens -12.5 -11.5 69,Cardinals 6.5 -6.5 75,ML,6,5,-320,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Ravens -12.5 -11.5 69,Cardinals 6.5 -6.5 75,Spread,6,5,-6.5,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Broncos -2.5 -1.5 66,Colts 25 1.5 34,ML,0,2,-120,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Broncos -2.5 -1.5 66,Colts 25 1.5 34,Spread,0,2,-2.5,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Chiefs 1.5 1.5 27,Vikings 4.5 -3.5 49,ML,2,0,-165,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Chiefs 1.5 1.5 27,Vikings 4.5 -3.5 49,Spread,2,0,-3.5,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Texans 15 -2.5 25,Chargers -3.5 -3.5 73,ML,1,3,-190,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Texans 15 -2.5 25,Chargers -3.5 -3.5 73,Spread,1,3,-3.5,MGM_FAM
+2025-09-16T01:30:03+00:00,Unknown,Bengals,Jets,ML,6,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Bengals,Jets,Spread,6,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Bengals,Jets,Total,6,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Steelers,Titans,ML,4,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Steelers,Titans,Spread,4,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Steelers,Titans,Total,4,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Saints,Bears,ML,6,2,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Saints,Bears,Spread,6,2,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Saints,Bears,Total,6,2,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Lions,Cowboys zi,ML,7,3,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Lions,Cowboys zi,Spread,7,3,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Lions,Cowboys zi,Total,7,3,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Dolphins Ai,Ravens,ML,8,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Dolphins Ai,Ravens,Spread,8,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Dolphins Ai,Ravens,Total,8,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Cardinals,Broncos,ML,7,3,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Cardinals,Broncos,Spread,7,3,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Cardinals,Broncos,Total,7,3,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Colts,Chiefs,ML,6,1,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Colts,Chiefs,Spread,6,1,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Colts,Chiefs,Total,6,1,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Vikings,Texans,ML,6,6,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Vikings,Texans,Spread,6,6,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Vikings,Texans,Total,6,6,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Chargers,Raiders,ML,3,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Chargers,Raiders,Spread,3,4,,COVERS_FAM
+2025-09-16T01:30:03+00:00,Unknown,Chargers,Raiders,Total,3,4,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,if Memphis 4,Troy 4,ML,66,49,-170,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,if Memphis 4,Troy 4,Spread,66,49,+4,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Q Oklahoma 13 -24,Temple 24,ML,50,50,+24,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Q Oklahoma 13 -24,Temple 24,Spread,50,50,+24,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,uh Buffalo -23,Kent ST 23,ML,30,19,+23,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,uh Buffalo -23,Kent ST 23,Spread,30,19,+23,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,C Michigan 28,Michigan 23 -28,ML,55,58,-28,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,C Michigan 28,Michigan 23 -28,Spread,55,58,-28,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,ee Clemson 12 3,Gr Georgia Tech 3,ML,91,42,-145,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,ee Clemson 12 3,Gr Georgia Tech 3,Spread,91,42,+3,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Wisconsin 20,Alabama 13 -20,ML,19,48,-20,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Wisconsin 20,Alabama 13 -20,Spread,19,48,-20,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,O Oregon 4 -25.5,N Northwestern 425.5,ML,49,15,-25,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,O Oregon 4 -25.5,N Northwestern 425.5,Spread,49,15,-25.5,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,SS Alabama 25,Auburn 24 -25,ML,60,45,-25,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,SS Alabama 25,Auburn 24 -25,Spread,60,45,-25,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,3 Louisiana 27,Missouri 25 -27,ML,72,70,-27,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,3 Louisiana 27,Missouri 25 -27,Spread,72,70,-27,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Connecticut 8,4 Delaware 8,ML,79,59,-290,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Connecticut 8,4 Delaware 8,Spread,79,59,+8,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,G Georgia 6 -4,T Tennessee 15 4,Spread,83,35,+4,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,x Pittsburgh -75,W West Virginia 75,ML,45,53,+75,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,x Pittsburgh -75,W West Virginia 75,Spread,45,53,+75,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,af. Washington ST 55,North Texas 55,ML,57,65,-200,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,af. Washington ST 55,North Texas 55,Spread,57,65,-200,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Oregon ST 423.5,F Texas Tech 21 -23.5,ML,66,81,-23,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Oregon ST 423.5,F Texas Tech 21 -23.5,Spread,66,81,-23.5,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,usc 2,Purdue 21,ML,27,42,+21,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,usc 2,Purdue 21,Spread,27,42,+21,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,7 SMU -28,Missouri ST 28,ML,42,35,+28,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,7 SMU -28,Missouri ST 28,Spread,42,35,+28,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,eI lowa ST 14 -21.5,Arkansas ST 421.5,ML,44,35,-21,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,eI lowa ST 14 -21.5,Arkansas ST 421.5,Spread,44,35,-21.5,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,g UTEP 405,y Texas 7 -40.5,ML,23,58,-40,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,g UTEP 405,y Texas 7 -40.5,Spread,23,58,-40.5,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,fF Liberty 55,RF Bowling Green 55,ML,61,27,+55,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,fF Liberty 55,RF Bowling Green 55,Spread,61,27,+55,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,ny Middle Tenn ST 49.5,Nevada -9.5,ML,14,56,-310,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,ny Middle Tenn ST 49.5,Nevada -9.5,Spread,14,56,-9.5,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,FL Atlantic 2,Florida Int 2,ML,53,48,-130,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,FL Atlantic 2,Florida Int 2,Spread,53,48,-130,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Appalachian ST 35,Southern Miss 35,ML,14,48,+35,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Appalachian ST 35,Southern Miss 35,Spread,14,48,+35,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Ohio 29.5,Ohio ST 1 -29.5,ML,34,54,-29,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Ohio 29.5,Ohio ST 1 -29.5,Spread,34,54,-29.5,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Old Dominion 55,Virginia Tech 55,ML,9,42,-210,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,Old Dominion 55,Virginia Tech 55,Spread,9,42,-210,MGM_FAM
+2025-09-16T01:30:12+00:00,Unknown,if Memphis,Q Oklahoma,ML,60,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,if Memphis,Q Oklahoma,Spread,60,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,if Memphis,Q Oklahoma,Total,60,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Temple,uh Buffalo,ML,0,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Temple,uh Buffalo,Spread,0,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Temple,uh Buffalo,Total,0,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,C Michigan,Michigan,ML,67,98,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,C Michigan,Michigan,Spread,67,98,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,C Michigan,Michigan,Total,67,98,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,ee Clemson,Gr Georgia Tech,ML,67,57,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,ee Clemson,Gr Georgia Tech,Spread,67,57,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,ee Clemson,Gr Georgia Tech,Total,67,57,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,O Oregon,N Northwestern,ML,33,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,O Oregon,N Northwestern,Spread,33,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,O Oregon,N Northwestern,Total,33,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,SS Alabama,G Georgia,ML,59,93,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,SS Alabama,G Georgia,Spread,59,93,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,SS Alabama,G Georgia,Total,59,93,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,T Tennessee,x Pittsburgh,ML,50,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,T Tennessee,x Pittsburgh,Spread,50,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,T Tennessee,x Pittsburgh,Total,50,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,W West Virginia,af. Washington ST,ML,67,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,W West Virginia,af. Washington ST,Spread,67,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,W West Virginia,af. Washington ST,Total,67,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,eI lowa ST,Ls Miami FL,ML,50,78,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,eI lowa ST,Ls Miami FL,Spread,50,78,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,eI lowa ST,Ls Miami FL,Total,50,78,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,fF Liberty,RF Bowling Green,ML,100,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,fF Liberty,RF Bowling Green,Spread,100,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,fF Liberty,RF Bowling Green,Total,100,100,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,ny Middle Tenn ST,Appalachian ST,ML,0,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,ny Middle Tenn ST,Appalachian ST,Spread,0,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,ny Middle Tenn ST,Appalachian ST,Total,0,0,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Southern Miss,Ohio,ML,50,50,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Southern Miss,Ohio,Spread,50,50,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Southern Miss,Ohio,Total,50,50,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Ohio ST,Old Dominion,ML,50,2,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Ohio ST,Old Dominion,Spread,50,2,,COVERS_FAM
+2025-09-16T01:30:12+00:00,Unknown,Ohio ST,Old Dominion,Total,50,2,,COVERS_FAM
+2025-09-16T01:30:33+00:00,Unknown,4 Tampa Bay Buccaneers 25,Vo ouean 25,ML,47,40,+25,MGM_FAM
+2025-09-16T01:30:33+00:00,Unknown,4 Tampa Bay Buccaneers 25,Vo ouean 25,Spread,47,40,+25,MGM_FAM
+2025-09-16T01:30:33+00:00,Unknown,pr Los Angeles Chargers 35,tas Vegas Raiders 35,ML,47,48,+35,MGM_FAM
+2025-09-16T01:30:33+00:00,Unknown,pr Los Angeles Chargers 35,tas Vegas Raiders 35,Spread,47,48,+35,MGM_FAM
+2025-09-16T01:30:33+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,ML,27,68,,COVERS_FAM
+2025-09-16T01:30:33+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,Spread,27,68,,COVERS_FAM
+2025-09-16T01:30:33+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,Total,27,68,,COVERS_FAM
