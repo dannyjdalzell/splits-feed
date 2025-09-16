@@ -11,7 +11,6 @@ on:
 permissions:
   contents: write
 
-# Avoid two runs fighting over the same branch
 concurrency:
   group: ocr-splits-main
   cancel-in-progress: true
@@ -23,7 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0      # we need full history to rebase/pull
+          fetch-depth: 0
 
       - name: Install Tesseract
         run: |
@@ -44,8 +43,6 @@ jobs:
         run: python scripts/splits_ocr.py
 
       - name: Commit splits.csv (if changed)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name  "splits-bot"
           git config user.email "splits-bot@users.noreply.github.com"
@@ -53,7 +50,6 @@ jobs:
           if ! git diff --quiet -- splits.csv; then
             git add splits.csv
             git commit -m "update splits.csv [ci]"
-            # rebase on latest remote to avoid non-fast-forward
             git fetch origin main
             git pull --rebase origin main
             git push origin HEAD:main || git push --force-with-lease origin HEAD:main
