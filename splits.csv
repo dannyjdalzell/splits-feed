@@ -415,3 +415,24 @@ timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source
 2025-09-16T06:00:28,MLB,A Arizona Diamondbacks,Philadelphia Phillies,ML,88,62,-128,GRID_OCR
 2025-09-16T06:00:28,MLB,A Arizona Diamondbacks,Philadelphia Phillies,Spread,88,62,-128,GRID_OCR
 2025-09-16T06:00:28,MLB,A Arizona Diamondbacks,Philadelphia Phillies,Total,88,62,88,GRID_OCR
+2025-09-16T11:40:45,MLB,Atlanta Braves,.,ML,450,671,-115,MGM_FAM
+2025-09-16T11:40:45,MLB,Atlanta Braves,.,Spread,450,671,-115,MGM_FAM
+2025-09-16T11:40:45,MLB,Atlanta Braves,.,Total,450,671,9,MGM_FAM
+2025-09-16T11:40:53,MLB,&y Tampa Bay Buccaneers,Houston Texans,ML,47,40,,GRID_OCR
+2025-09-16T11:40:53,MLB,&y Tampa Bay Buccaneers,Houston Texans,Spread,47,40,,GRID_OCR
+2025-09-16T11:40:53,MLB,&y Tampa Bay Buccaneers,Houston Texans,Total,47,40,25,GRID_OCR
+2025-09-16T11:40:53,MLB,Nt New York Yankees,Minnesota Twins,ML,2,22,-190,GRID_OCR
+2025-09-16T11:40:53,MLB,Nt New York Yankees,Minnesota Twins,Spread,2,22,-190,GRID_OCR
+2025-09-16T11:40:53,MLB,Nt New York Yankees,Minnesota Twins,Total,2,22,2,GRID_OCR
+2025-09-16T11:44:16,MLB,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,ML,53,52,,GRID_OCR
+2025-09-16T11:44:16,MLB,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,Spread,53,52,,GRID_OCR
+2025-09-16T11:44:16,MLB,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,Total,53,52,35,GRID_OCR
+2025-09-16T11:44:16,MLB,C Chicago Cubs,A Atlanta Braves,ML,97,45,-162,GRID_OCR
+2025-09-16T11:44:16,MLB,C Chicago Cubs,A Atlanta Braves,Spread,97,45,-162,GRID_OCR
+2025-09-16T11:44:16,MLB,C Chicago Cubs,A Atlanta Braves,Total,97,45,97,GRID_OCR
+2025-09-16T11:44:16,MLB,& Baltimore rioles,Minnesota Twins,ML,2,22,+15,GRID_OCR
+2025-09-16T11:44:16,MLB,& Baltimore rioles,Minnesota Twins,Spread,2,22,+15,GRID_OCR
+2025-09-16T11:44:16,MLB,& Baltimore rioles,Minnesota Twins,Total,2,22,2,GRID_OCR
+2025-09-16T11:44:16,MLB,A Arizona Diamondbacks,Philadelphia Phillies,ML,88,62,-128,GRID_OCR
+2025-09-16T11:44:16,MLB,A Arizona Diamondbacks,Philadelphia Phillies,Spread,88,62,-128,GRID_OCR
+2025-09-16T11:44:16,MLB,A Arizona Diamondbacks,Philadelphia Phillies,Total,88,62,88,GRID_OCR
