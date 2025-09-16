@@ -218,21 +218,33 @@ def main():
         else:
             print(f"[WARN] No rows parsed from: {fname} (see out/{base}.txt & DEBUG_{base}_psm{psm}.png)")
 
-    if all_rows:
-        exists = os.path.exists(OUT_FILE)
-        with open(OUT_FILE, "a", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=FIELDNAMES)
-            if not exists:
-                w.writeheader()
-            for r in all_rows:
-                r.setdefault("league","Unknown")
-                r.setdefault("line","")
-                r["tickets_pct"] = int(r.get("tickets_pct", 0) or 0)
-                r["handle_pct"]  = int(r.get("handle_pct", 0) or 0)
-                w.writerow(r)
-        print(f"Appended {len(all_rows)} row(s) → {OUT_FILE}")
+        if all_rows:
+        # Filter junk → keep only valid
+        goods, rejects = [], []
+        seen = set()
+        for r in all_rows:
+            if is_valid_row(r):
+                key = canonical_key(r)
+                if key not in seen:
+                    seen.add(key)
+                    goods.append(r)
+            else:
+                rejects.append(r)
+
+        if goods:
+            write_csv(OUT_FILE, goods, FIELDNAMES)
+            print(f"[CLEAN] Appended {len(goods)} good row(s) → {OUT_FILE}")
+        else:
+            print("[CLEAN] No valid rows to append.")
+
+        # Write rejects for inspection
+        if rejects:
+            rej_path = os.path.join(DEBUG_DIR, "rejects.csv")
+            write_csv(rej_path, rejects, FIELDNAMES)
+            print(f"[CLEAN] Wrote {len(rejects)} rejected row(s) → {rej_path}")
     else:
         print("No valid rows parsed from any image.")
+
 
 if __name__ == "__main__":
     main()
