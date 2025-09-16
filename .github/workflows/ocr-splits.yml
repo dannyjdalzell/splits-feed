@@ -45,15 +45,26 @@ jobs:
         run: |
           python scripts/splits_ocr.py
 
-      - name: Commit splits.csv (skip ci if committing)
+      - name: Commit splits.csv (commit-first, then rebase safely)
         run: |
           git config user.email "bot@local"
           git config user.name "splits-bot"
-          git pull --rebase
-          git add splits.csv
+
+          # 1) Commit first so the tree is clean
+          git add splits.csv || true
           if ! git diff --cached --quiet; then
             git commit -m "[skip ci] update splits.csv"
-            git push
           else
-            echo "No updates to splits.csv; skipping commit."
+            echo "No updates to splits.csv; nothing to commit."
           fi
+
+          # 2) Rebase on remote; if it conflicts, fall back to a merge
+          git fetch origin
+          if ! git rebase origin/main; then
+            echo "Rebase conflict; falling back to merge"
+            git rebase --abort || true
+            git pull --no-rebase --no-edit
+          fi
+
+          # 3) Push whatever we have
+          git push
