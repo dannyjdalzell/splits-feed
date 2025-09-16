@@ -39,7 +39,6 @@ jobs:
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          # Core OCR + data handling; add any extras your script imports.
           pip install pillow pytesseract opencv-python-headless python-dateutil pandas
 
       - name: Run OCR on new/changed images
