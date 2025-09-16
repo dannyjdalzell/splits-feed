@@ -313,3 +313,42 @@ timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source
 2025-09-16T04:06:14,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,ML,88,62,-128,GRID_OCR
 2025-09-16T04:06:14,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,Spread,88,62,-128,GRID_OCR
 2025-09-16T04:06:14,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,Total,88,62,88,GRID_OCR
+2025-09-16T04:11:50,MLB,New York Yankees,St. Louis Cardinals,ML,32,21,-110,GRID_OCR
+2025-09-16T04:11:50,MLB,New York Yankees,St. Louis Cardinals,Spread,32,21,-110,GRID_OCR
+2025-09-16T04:11:50,MLB,New York Yankees,St. Louis Cardinals,Total,32,21,32,GRID_OCR
+2025-09-16T04:11:50,MLB,Houston Astros,Arizona Diamondbacks,ML,60,44,+100,GRID_OCR
+2025-09-16T04:11:50,MLB,Houston Astros,Arizona Diamondbacks,Spread,60,44,+100,GRID_OCR
+2025-09-16T04:11:50,MLB,Houston Astros,Arizona Diamondbacks,Total,60,44,60,GRID_OCR
+2025-09-16T04:11:50,MLB,Atlanta Braves,.,ML,450,671,-115,MGM_FAM
+2025-09-16T04:11:50,MLB,Atlanta Braves,.,Spread,450,671,-115,MGM_FAM
+2025-09-16T04:11:50,MLB,Atlanta Braves,.,Total,450,671,9,MGM_FAM
+2025-09-16T04:11:59,MLB,&y Tampa Bay Buccaneers,Houston Texans,ML,47,40,,GRID_OCR
+2025-09-16T04:11:59,MLB,&y Tampa Bay Buccaneers,Houston Texans,Spread,47,40,,GRID_OCR
+2025-09-16T04:11:59,MLB,&y Tampa Bay Buccaneers,Houston Texans,Total,47,40,25,GRID_OCR
+2025-09-16T04:11:59,MLB,Nt New York Yankees,Minnesota Twins,ML,2,22,-190,GRID_OCR
+2025-09-16T04:11:59,MLB,Nt New York Yankees,Minnesota Twins,Spread,2,22,-190,GRID_OCR
+2025-09-16T04:11:59,MLB,Nt New York Yankees,Minnesota Twins,Total,2,22,2,GRID_OCR
+2025-09-16T04:12:21,NCAAF,klahoma,Temple,ML,44,50,+24,GRID_OCR
+2025-09-16T04:12:21,NCAAF,klahoma,Temple,Spread,44,50,+24,GRID_OCR
+2025-09-16T04:12:21,NCAAF,klahoma,Temple,Total,44,50,5,GRID_OCR
+2025-09-16T04:12:21,NCAAF,Central Michigan,Michigan,ML,64,88,-27,GRID_OCR
+2025-09-16T04:12:21,NCAAF,Central Michigan,Michigan,Spread,64,88,-27,GRID_OCR
+2025-09-16T04:12:21,NCAAF,Central Michigan,Michigan,Total,64,88,2,GRID_OCR
+2025-09-16T04:12:21,NCAAF,Gregon State,SMiami,ML,33,40,-770,GRID_OCR
+2025-09-16T04:12:21,NCAAF,Gregon State,SMiami,Spread,33,40,-770,GRID_OCR
+2025-09-16T04:12:21,NCAAF,Gregon State,SMiami,Total,33,40,15.5,GRID_OCR
+2025-09-16T04:12:21,NCAAF,IDhio State,Westem Michigan,ML,6,71,+275,GRID_OCR
+2025-09-16T04:12:21,NCAAF,IDhio State,Westem Michigan,Spread,6,71,+275,GRID_OCR
+2025-09-16T04:12:21,NCAAF,IDhio State,Westem Michigan,Total,6,71,5,GRID_OCR
+2025-09-16T04:12:27,MLB,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,ML,53,52,,GRID_OCR
+2025-09-16T04:12:27,MLB,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,Spread,53,52,,GRID_OCR
+2025-09-16T04:12:27,MLB,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,Total,53,52,35,GRID_OCR
+2025-09-16T04:12:27,MLB,C Chicago Cubs,A Atlanta Braves,ML,97,45,-162,GRID_OCR
+2025-09-16T04:12:27,MLB,C Chicago Cubs,A Atlanta Braves,Spread,97,45,-162,GRID_OCR
+2025-09-16T04:12:27,MLB,C Chicago Cubs,A Atlanta Braves,Total,97,45,97,GRID_OCR
+2025-09-16T04:12:27,MLB,& Baltimore rioles,Minnesota Twins,ML,2,22,+15,GRID_OCR
+2025-09-16T04:12:27,MLB,& Baltimore rioles,Minnesota Twins,Spread,2,22,+15,GRID_OCR
+2025-09-16T04:12:27,MLB,& Baltimore rioles,Minnesota Twins,Total,2,22,2,GRID_OCR
+2025-09-16T04:12:27,MLB,A Arizona Diamondbacks,Philadelphia Phillies,ML,88,62,-128,GRID_OCR
+2025-09-16T04:12:27,MLB,A Arizona Diamondbacks,Philadelphia Phillies,Spread,88,62,-128,GRID_OCR
+2025-09-16T04:12:27,MLB,A Arizona Diamondbacks,Philadelphia Phillies,Total,88,62,88,GRID_OCR
