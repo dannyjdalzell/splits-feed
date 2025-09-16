@@ -205,3 +205,111 @@ timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source
 2025-09-16T03:27:32+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,ML,27,68,,COVERS_FAM
 2025-09-16T03:27:32+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,Spread,27,68,,COVERS_FAM
 2025-09-16T03:27:32+00:00,Unknown,Vo ouean,pr Los Angeles Chargers,Total,27,68,,COVERS_FAM
+2025-09-16T04:05:38,Unknown,New York Yankees,St. Louis Cardinals,ML,32,21,-110,GRID_OCR
+2025-09-16T04:05:38,Unknown,New York Yankees,St. Louis Cardinals,Spread,32,21,-110,GRID_OCR
+2025-09-16T04:05:38,Unknown,New York Yankees,St. Louis Cardinals,Total,32,21,32,GRID_OCR
+2025-09-16T04:05:38,Unknown,Houston Astros,Arizona Diamondbacks,ML,60,44,+100,GRID_OCR
+2025-09-16T04:05:38,Unknown,Houston Astros,Arizona Diamondbacks,Spread,60,44,+100,GRID_OCR
+2025-09-16T04:05:38,Unknown,Houston Astros,Arizona Diamondbacks,Total,60,44,60,GRID_OCR
+2025-09-16T04:05:38,MLB,Chicago Cubs,,ML,66,89,-120,MGM_FAM
+2025-09-16T04:05:38,MLB,Chicago Cubs,,Spread,66,89,-120,MGM_FAM
+2025-09-16T04:05:38,MLB,Chicago Cubs,,Total,66,89,66,MGM_FAM
+2025-09-16T04:05:38,MLB,Atlanta Braves,.,ML,450,671,-115,MGM_FAM
+2025-09-16T04:05:38,MLB,Atlanta Braves,.,Spread,450,671,-115,MGM_FAM
+2025-09-16T04:05:38,MLB,Atlanta Braves,.,Total,450,671,9,MGM_FAM
+2025-09-16T04:05:38,MLB,Toronto Blue Jays,,ML,76,65,-105,MGM_FAM
+2025-09-16T04:05:38,MLB,Toronto Blue Jays,,Spread,76,65,-105,MGM_FAM
+2025-09-16T04:05:38,MLB,Toronto Blue Jays,,Total,76,65,76,MGM_FAM
+2025-09-16T04:05:38,MLB,Baltimore rioles,,ML,63,68,+120,MGM_FAM
+2025-09-16T04:05:38,MLB,Baltimore rioles,,Spread,63,68,+120,MGM_FAM
+2025-09-16T04:05:38,MLB,Baltimore rioles,,Total,63,68,63,MGM_FAM
+2025-09-16T04:05:38,MLB,New York Yankees,,ML,78,88,-190,MGM_FAM
+2025-09-16T04:05:38,MLB,New York Yankees,,Spread,78,88,-190,MGM_FAM
+2025-09-16T04:05:38,MLB,New York Yankees,,Total,78,88,78,MGM_FAM
+2025-09-16T04:05:46,Unknown,&y Tampa Bay Buccaneers,Houston Texans,ML,47,40,,GRID_OCR
+2025-09-16T04:05:46,Unknown,&y Tampa Bay Buccaneers,Houston Texans,Spread,47,40,,GRID_OCR
+2025-09-16T04:05:46,Unknown,&y Tampa Bay Buccaneers,Houston Texans,Total,47,40,25,GRID_OCR
+2025-09-16T04:05:46,Unknown,Nt New York Yankees,Minnesota Twins,ML,2,22,-190,GRID_OCR
+2025-09-16T04:05:46,Unknown,Nt New York Yankees,Minnesota Twins,Spread,2,22,-190,GRID_OCR
+2025-09-16T04:05:46,Unknown,Nt New York Yankees,Minnesota Twins,Total,2,22,2,GRID_OCR
+2025-09-16T04:05:47,Unknown,F Atlanta Falcons,Minnesota Vikings,ML,35,45,-180,GRID_OCR
+2025-09-16T04:05:47,Unknown,F Atlanta Falcons,Minnesota Vikings,Spread,35,45,-180,GRID_OCR
+2025-09-16T04:05:47,Unknown,F Atlanta Falcons,Minnesota Vikings,Total,35,45,4,GRID_OCR
+2025-09-16T04:06:00,Unknown,i Memphis,Temple,ML,50,50,,GRID_OCR
+2025-09-16T04:06:00,Unknown,i Memphis,Temple,Spread,50,50,,GRID_OCR
+2025-09-16T04:06:00,Unknown,i Memphis,Temple,Total,50,50,50,GRID_OCR
+2025-09-16T04:06:00,Unknown,C Michigan,Gr Georgia Tech,ML,91,42,+28,GRID_OCR
+2025-09-16T04:06:00,Unknown,C Michigan,Gr Georgia Tech,Spread,91,42,+3,GRID_OCR
+2025-09-16T04:06:00,Unknown,C Michigan,Gr Georgia Tech,Total,91,42,3,GRID_OCR
+2025-09-16T04:06:00,Unknown,N Northwestern,Y West Virginia,ML,45,53,+75,GRID_OCR
+2025-09-16T04:06:00,Unknown,N Northwestern,Y West Virginia,Spread,45,53,+75,GRID_OCR
+2025-09-16T04:06:00,Unknown,N Northwestern,Y West Virginia,Total,45,53,75,GRID_OCR
+2025-09-16T04:06:00,Unknown,&& Washington ST,& Purdue,ML,27,42,+21,GRID_OCR
+2025-09-16T04:06:00,Unknown,&& Washington ST,& Purdue,Spread,27,42,+21,GRID_OCR
+2025-09-16T04:06:00,Unknown,&& Washington ST,& Purdue,Total,27,42,21,GRID_OCR
+2025-09-16T04:06:00,Unknown,of TEP,i Liberty,ML,39,3,-195,GRID_OCR
+2025-09-16T04:06:00,Unknown,of TEP,i Liberty,Spread,39,3,-195,GRID_OCR
+2025-09-16T04:06:00,Unknown,of TEP,i Liberty,Total,39,3,55,GRID_OCR
+2025-09-16T04:06:00,Unknown,Bowling Green,Appalachian ST,ML,86,52,-160,GRID_OCR
+2025-09-16T04:06:00,Unknown,Bowling Green,Appalachian ST,Spread,86,52,-160,GRID_OCR
+2025-09-16T04:06:00,Unknown,Bowling Green,Appalachian ST,Total,86,52,35,GRID_OCR
+2025-09-16T04:06:00,Unknown,Southern Miss,hio,ML,66,46,,GRID_OCR
+2025-09-16T04:06:00,Unknown,Southern Miss,hio,Spread,66,46,,GRID_OCR
+2025-09-16T04:06:00,Unknown,Southern Miss,hio,Total,66,46,5,GRID_OCR
+2025-09-16T04:06:00,Unknown,ld Dominion,Virginia Tech,ML,9,42,-210,GRID_OCR
+2025-09-16T04:06:00,Unknown,ld Dominion,Virginia Tech,Spread,9,42,-210,GRID_OCR
+2025-09-16T04:06:00,Unknown,ld Dominion,Virginia Tech,Total,9,42,55,GRID_OCR
+2025-09-16T04:06:08,Unknown,klahoma,Temple,ML,44,50,+24,GRID_OCR
+2025-09-16T04:06:08,Unknown,klahoma,Temple,Spread,44,50,+24,GRID_OCR
+2025-09-16T04:06:08,Unknown,klahoma,Temple,Total,44,50,5,GRID_OCR
+2025-09-16T04:06:08,Unknown,Central Michigan,Michigan,ML,64,88,-27,GRID_OCR
+2025-09-16T04:06:08,Unknown,Central Michigan,Michigan,Spread,64,88,-27,GRID_OCR
+2025-09-16T04:06:08,Unknown,Central Michigan,Michigan,Total,64,88,2,GRID_OCR
+2025-09-16T04:06:08,Unknown,Gregon State,SMiami,ML,33,40,-770,GRID_OCR
+2025-09-16T04:06:08,Unknown,Gregon State,SMiami,Spread,33,40,-770,GRID_OCR
+2025-09-16T04:06:08,Unknown,Gregon State,SMiami,Total,33,40,15.5,GRID_OCR
+2025-09-16T04:06:08,Unknown,IDhio State,Westem Michigan,ML,6,71,+275,GRID_OCR
+2025-09-16T04:06:08,Unknown,IDhio State,Westem Michigan,Spread,6,71,+275,GRID_OCR
+2025-09-16T04:06:08,Unknown,IDhio State,Westem Michigan,Total,6,71,5,GRID_OCR
+2025-09-16T04:06:08,NCAAF,regon,,ML,86,86,-28,MGM_FAM
+2025-09-16T04:06:08,NCAAF,regon,,Spread,86,86,-28.5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,regon,,Total,86,86,28.5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Clemson,,ML,62,52,-190,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Clemson,,Spread,62,52,-190,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Clemson,,Total,62,52,6,MGM_FAM
+2025-09-16T04:06:08,NCAAF,klahoma,,ML,56,80,-24,MGM_FAM
+2025-09-16T04:06:08,NCAAF,klahoma,,Spread,56,80,-24.5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,klahoma,,Total,56,80,24.5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Central Michigan,,ML,6,89,+160,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Central Michigan,,Spread,6,89,+1600,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Central Michigan,,Total,6,89,5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,South Alabama,,ML,50,1,+140,MGM_FAM
+2025-09-16T04:06:08,NCAAF,South Alabama,,Spread,50,1,+1400,MGM_FAM
+2025-09-16T04:06:08,NCAAF,South Alabama,,Total,50,1,5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Georgia,,ML,60,54,-250,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Georgia,,Spread,60,54,-4,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Georgia,,Total,60,54,75,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Gregon State,,ML,27,49,+110,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Gregon State,,Spread,27,49,+1100,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Gregon State,,Total,27,49,5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,lowa State,,ML,70,72,-21,MGM_FAM
+2025-09-16T04:06:08,NCAAF,lowa State,,Spread,70,72,-21,MGM_FAM
+2025-09-16T04:06:08,NCAAF,lowa State,,Total,70,72,21,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Westem Michigan,,ML,6,71,+275,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Westem Michigan,,Spread,6,71,+275,MGM_FAM
+2025-09-16T04:06:08,NCAAF,Westem Michigan,,Total,6,71,5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,tah,,ML,57,32,-23,MGM_FAM
+2025-09-16T04:06:08,NCAAF,tah,,Spread,57,32,-23.5,MGM_FAM
+2025-09-16T04:06:08,NCAAF,tah,,Total,57,32,23.5,MGM_FAM
+2025-09-16T04:06:14,Unknown,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,ML,53,52,,GRID_OCR
+2025-09-16T04:06:14,Unknown,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,Spread,53,52,,GRID_OCR
+2025-09-16T04:06:14,Unknown,Ay Tampa Bay Buccaneers,es Los Angeles Chargers,Total,53,52,35,GRID_OCR
+2025-09-16T04:06:14,Unknown,C Chicago Cubs,A Atlanta Braves,ML,97,45,-162,GRID_OCR
+2025-09-16T04:06:14,Unknown,C Chicago Cubs,A Atlanta Braves,Spread,97,45,-162,GRID_OCR
+2025-09-16T04:06:14,Unknown,C Chicago Cubs,A Atlanta Braves,Total,97,45,97,GRID_OCR
+2025-09-16T04:06:14,Unknown,& Baltimore rioles,Minnesota Twins,ML,2,22,+15,GRID_OCR
+2025-09-16T04:06:14,Unknown,& Baltimore rioles,Minnesota Twins,Spread,2,22,+15,GRID_OCR
+2025-09-16T04:06:14,Unknown,& Baltimore rioles,Minnesota Twins,Total,2,22,2,GRID_OCR
+2025-09-16T04:06:14,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,ML,88,62,-128,GRID_OCR
+2025-09-16T04:06:14,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,Spread,88,62,-128,GRID_OCR
+2025-09-16T04:06:14,Unknown,A Arizona Diamondbacks,Philadelphia Phillies,Total,88,62,88,GRID_OCR
