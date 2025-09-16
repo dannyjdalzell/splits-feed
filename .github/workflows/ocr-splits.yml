@@ -1,27 +1,28 @@
 name: OCR Splits
 
-# ✅ Let the workflow push commits back to the repo
-permissions:
-  contents: write
-
 on:
   push:
     paths:
-      - "images/**"          # run when you add/update screenshots
-  workflow_dispatch: {}       # manual run button
-  schedule:
-    - cron: "*/15 * * * *"    # optional safety tick
+      - "images/**"
+      - "scripts/**"
+      - ".github/workflows/ocr-splits.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ocr-splits-main
+  cancel-in-progress: true
 
 jobs:
   ocr:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # uses the built-in GITHUB_TOKEN (respects permissions: contents:write)
-          persist-credentials: true
+          fetch-depth: 0
 
       - name: Install Tesseract
         run: |
@@ -36,19 +37,22 @@ jobs:
       - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          pip install pillow pytesseract pandas
+          pip install pillow pytesseract
 
       - name: Run OCR script
         run: python scripts/splits_ocr.py
 
       - name: Commit splits.csv (if changed)
         run: |
-          git config user.name "splits-bot"
+          git config user.name  "splits-bot"
           git config user.email "splits-bot@users.noreply.github.com"
+
           if ! git diff --quiet -- splits.csv; then
             git add splits.csv
             git commit -m "update splits.csv [ci]"
-            git push
+            git fetch origin main
+            git pull --rebase origin main
+            git push origin HEAD:main || git push --force-with-lease origin HEAD:main
           else
             echo "No changes in splits.csv — skipping commit."
           fi
