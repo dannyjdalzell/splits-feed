@@ -8,7 +8,8 @@ on:
       - 'scripts/**'
       - '.github/workflows/ocr-splits.yml'
   workflow_dispatch:
-
+schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes
 
 permissions:
   contents: write
