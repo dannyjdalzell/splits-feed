@@ -3,7 +3,7 @@ name: Weekly Clean
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * 2"   # Tuesday 00:00 UTC
+    - cron: "0 0 * * 2"
 
 jobs:
   cleanup:
