@@ -3,9 +3,9 @@ name: OCR Splits
 on:
   push:
     paths:
-      - 'images/**'
-      - 'scripts/**'
-      - '.github/workflows/ocr-splits.yml'
+      - "images/**"
+      - "scripts/**"
+      - ".github/workflows/ocr-splits.yml"
   workflow_dispatch: {}
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install deps
         run: |
@@ -35,20 +35,18 @@ jobs:
           pip install pandas pillow pytesseract playwright
           python -m playwright install --with-deps chromium
 
-      # 👉 Your scraper / OCR step(s). Keep or adjust the command(s) you already use.
       - name: Run scraper (pregame)
         run: |
           python3 scripts/pregame_scraper.py || true
 
-      # (Optional) run the audit/cleaner if you want it in CI
-      - name: Run audit cleaner
+      - name: Run audit cleaner (optional)
         run: |
           if [ -f scripts/audit_splits.py ]; then
             python3 scripts/audit_splits.py || true
           fi
 
-      # ---------- conflict-safe commit & push of splits.csv ----------
-      - name: Merge + commit splits.csv (conflict-safe)
+      - name: Merge + push splits.csv (conflict-safe)
+        shell: bash
         run: |
           set -euo pipefail
           BRANCH="${GITHUB_REF#refs/heads/}"
@@ -56,10 +54,8 @@ jobs:
           git config user.email "bot@local"
           git config user.name "splits-bot"
 
-          echo "==> fetch remote branch"
           git fetch origin "$BRANCH" --depth=1 || true
 
-          echo "==> pull remote splits.csv (if exists) to /tmp"
           mkdir -p /tmp/merge_splits
           if git cat-file -e "origin/$BRANCH:splits.csv" 2>/dev/null; then
             git show "origin/$BRANCH:splits.csv" > /tmp/merge_splits/remote.csv
@@ -67,11 +63,9 @@ jobs:
             : > /tmp/merge_splits/remote.csv
           fi
 
-          echo "==> ensure local splits.csv exists"
           [ -f splits.csv ] || : > splits.csv
           cp splits.csv /tmp/merge_splits/local.csv
 
-          echo "==> union + de-dup using pandas"
           python - <<'PY'
 import pandas as pd
 from pathlib import Path
@@ -88,7 +82,6 @@ def load(p: Path):
 
 remote = load(Path("/tmp/merge_splits/remote.csv"))
 local  = load(Path("/tmp/merge_splits/local.csv"))
-
 all_rows = pd.concat([remote, local], ignore_index=True)
 
 for c in all_rows.columns:
@@ -96,7 +89,6 @@ for c in all_rows.columns:
         all_rows[c] = all_rows[c].astype(str).str.strip()
 
 all_rows = all_rows.drop_duplicates()
-
 if "timestamp" in all_rows.columns:
     all_rows = all_rows.sort_values("timestamp")
 
@@ -104,55 +96,11 @@ all_rows.to_csv("splits.csv", index=False)
 print(f"[merge] remote={len(remote)} local={len(local)} -> out={len(all_rows)}")
 PY
 
-          echo "==> stage + commit"
           git add splits.csv
-          if ! git diff --cached --quiet; then
-            git commit -m "[skip ci] merge/append splits.csv (conflict-safe)"
-          else
-            echo "No changes to commit."
-          fi
+          git commit -m "[skip ci] merge/append splits.csv" || echo "No changes to commit."
 
-          echo "==> push with retry, then force-with-lease"
-          tries=0
-          until [ $tries -ge 3 ]
-          do
-            if git push origin "HEAD:$BRANCH"; then
-              echo "Push succeeded"; exit 0
-            fi
-            tries=$((tries+1))
-            echo "Push failed (attempt $tries). Refetch + retry…"
+          # push with one retry, then force-with-lease
+          git push origin "HEAD:$BRANCH" || {
             git fetch origin "$BRANCH" --depth=1 || true
-            if git cat-file -e "origin/$BRANCH:splits.csv" 2>/dev/null; then
-              git show "origin/$BRANCH:splits.csv" > /tmp/merge_splits/remote.csv
-            else
-              : > /tmp/merge_splits/remote.csv
-            fi
-            python - <<'PY'
-import pandas as pd
-from pathlib import Path
-COLUMNS=["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"]
-def load(p: Path):
-    try:
-        if not p.exists() or p.stat().st_size == 0:
-            return pd.DataFrame(columns=COLUMNS)
-        return pd.read_csv(p, dtype=str, keep_default_na=False)
-    except Exception:
-        return pd.DataFrame(columns=COLUMNS)
-remote = load(Path("/tmp/merge_splits/remote.csv"))
-local  = load(Path("splits.csv"))
-all_rows = pd.concat([remote, local], ignore_index=True)
-for c in all_rows.columns:
-    if all_rows[c].dtype == object:
-        all_rows[c] = all_rows[c].astype(str).str.strip()
-all_rows = all_rows.drop_duplicates()
-if "timestamp" in all_rows.columns:
-    all_rows = all_rows.sort_values("timestamp")
-all_rows.to_csv("splits.csv", index=False)
-print(f"[retry-merge] remote={len(remote)} local={len(local)} -> out={len(all_rows)}")
-PY
-            git add splits.csv
-            git commit -m "[skip ci] re-merge splits.csv after fetch" || true
-          done
-
-          echo "Final attempt: --force-with-lease"
-          git push --force-with-lease origin "HEAD:$BRANCH"
+            git push --force-with-lease origin "HEAD:$BRANCH"
+          }
