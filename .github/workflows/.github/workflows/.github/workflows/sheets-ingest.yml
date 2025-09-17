@@ -1,0 +1,89 @@
+name: Sheets Ingest (manual)
+
+on:
+  workflow_dispatch: {}   # button-only trigger (no schedule)
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sheets-ingest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib requests pandas
+
+      - name: Sheets → images/ (download new image URLs)
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+        run: |
+          import os, json, requests, pandas as pd
+          from googleapiclient.discovery import build
+          from google.oauth2 import service_account
+          from urllib.parse import urlparse
+
+          creds = service_account.Credentials.from_service_account_info(
+              json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]),
+              scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
+          )
+          service = build("sheets", "v4", credentials=creds)
+          sheet = service.spreadsheets()
+          sheet_id = os.environ["SPLITS_TWEETS_SHEET_ID"]
+
+          # Read full sheet
+          result = sheet.values().get(spreadsheetId=sheet_id, range="twitter_splits_feed").execute()
+          rows = result.get("values", [])[1:]  # skip header
+          print(f"[INGEST] got {len(rows)} rows")
+
+          os.makedirs("images", exist_ok=True)
+
+          added = 0
+          for r in rows:
+              if len(r) < 3: 
+                  continue
+              url = r[2]
+              if not url or not url.startswith("http"):
+                  continue
+              fn = os.path.basename(urlparse(url).path)
+              path = os.path.join("images", fn)
+              if os.path.exists(path):
+                  continue
+              try:
+                  resp = requests.get(url, timeout=20)
+                  with open(path, "wb") as f:
+                      f.write(resp.content)
+                  print(f"[INGEST] saved {path}")
+                  added += 1
+              except Exception as e:
+                  print(f"[WARN] could not fetch {url}: {e}")
+
+          print(f"[INGEST] {added} new images")
+
+      - name: Commit & push new images (triggers OCR)
+        run: |
+          git config user.email "bot@local"
+          git config user.name "splits-bot"
+          git add images/*.png images/*.jpg images/*.jpeg || true
+          if git diff --cached --quiet; then
+            echo "No new images to commit."
+          else
+            git commit -m "[sheets-ingest][skip ci] add images from Google Sheets"
+            git push
+          fi
