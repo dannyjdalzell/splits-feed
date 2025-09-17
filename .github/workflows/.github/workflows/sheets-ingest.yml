@@ -1,7 +1,7 @@
 name: Sheets Ingest (manual)
 
 on:
-  workflow_dispatch: {}   # button-only trigger (no schedule)
+  workflow_dispatch: {}  # button-only
 
 permissions:
   contents: write
@@ -13,6 +13,7 @@ concurrency:
 jobs:
   ingest:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -27,63 +28,102 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib requests pandas
+          pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib requests python-dateutil pandas pillow
 
-      - name: Sheets → images/ (download new image URLs)
+      - name: Sheets ➜ images/ (download any new image URLs)
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
         run: |
-          import os, json, requests, pandas as pd
-          from googleapiclient.discovery import build
-          from google.oauth2 import service_account
+          python - <<'PY'
+          import os, io, json, time, pathlib, re, requests
           from urllib.parse import urlparse
+          from google.oauth2 import service_account
+          from googleapiclient.discovery import build
+
+          SA_JSON = os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
+          SHEET_ID = os.environ["SPLITS_TWEETS_SHEET_ID"]
 
           creds = service_account.Credentials.from_service_account_info(
-              json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]),
-              scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"],
+              json.loads(SA_JSON),
+              scopes=['https://www.googleapis.com/auth/spreadsheets.readonly']
           )
-          service = build("sheets", "v4", credentials=creds)
-          sheet = service.spreadsheets()
-          sheet_id = os.environ["SPLITS_TWEETS_SHEET_ID"]
+          svc = build('sheets','v4',credentials=creds)
+          # read the whole tab named "twitter_splits_feed"
+          resp = svc.spreadsheets().values().get(
+              spreadsheetId=SHEET_ID,
+              range='twitter_splits_feed!A:Z'
+          ).execute()
+          rows = resp.get('values', [])
+          if not rows:
+              print("[INGEST] no rows")
+              raise SystemExit(0)
 
-          # Read full sheet
-          result = sheet.values().get(spreadsheetId=sheet_id, range="twitter_splits_feed").execute()
-          rows = result.get("values", [])[1:]  # skip header
-          print(f"[INGEST] got {len(rows)} rows")
+          # find header indexes
+          header = [h.strip().lower() for h in rows[0]]
+          def idx(name):
+              try: return header.index(name)
+              except ValueError: return None
 
-          os.makedirs("images", exist_ok=True)
+          # commonly present columns (best-effort)
+          ts_i   = idx('createdat') or idx('timestamp') or 0
+          img_i  = idx('imageurl')  or idx('image_url') or idx('mediaurl') or None
+
+          save_dir = pathlib.Path('images')
+          save_dir.mkdir(exist_ok=True)
+
+          # de-dup ledger
+          ledger = pathlib.Path('test/sheets_ingest_ledger.txt')
+          ledger.parent.mkdir(exist_ok=True)
+          seen = set()
+          if ledger.exists():
+              seen.update([l.strip() for l in ledger.read_text().splitlines() if l.strip()])
 
           added = 0
-          for r in rows:
-              if len(r) < 3: 
+          new_seen = []
+          for r in rows[1:]:
+              if img_i is None or img_i >= len(r): 
                   continue
-              url = r[2]
-              if not url or not url.startswith("http"):
+              url = (r[img_i] or '').strip()
+              if not url or not url.startswith('http'):
                   continue
-              fn = os.path.basename(urlparse(url).path)
-              path = os.path.join("images", fn)
-              if os.path.exists(path):
+              key = url
+              if key in seen:
                   continue
+              # make filename
+              ts = (r[ts_i] if ts_i is not None and ts_i < len(r) else str(int(time.time())))
+              parsed = urlparse(url)
+              ext = pathlib.Path(parsed.path).suffix.lower()
+              if ext not in ('.png','.jpg','.jpeg','.webp'):
+                  ext = '.jpg'
+              out = save_dir / f"sheet_{int(time.time())}{ext}"
               try:
-                  resp = requests.get(url, timeout=20)
-                  with open(path, "wb") as f:
-                      f.write(resp.content)
-                  print(f"[INGEST] saved {path}")
+                  resp = requests.get(url, timeout=30)
+                  resp.raise_for_status()
+                  out.write_bytes(resp.content)
+                  print(f"[INGEST] saved {out}")
                   added += 1
+                  new_seen.append(key)
               except Exception as e:
-                  print(f"[WARN] could not fetch {url}: {e}")
+                  print(f"[WARN] {url}: {e}")
 
-          print(f"[INGEST] {added} new images")
+          if new_seen:
+              with ledger.open('a') as w:
+                  for k in new_seen:
+                      w.write(k + '\n')
+          print(f"[INGEST] new images: {added}")
+          PY
 
-      - name: Commit & push new images (triggers OCR)
+      - name: Commit & push any new images (triggers OCR)
         run: |
           git config user.email "bot@local"
           git config user.name "splits-bot"
-          git add images/*.png images/*.jpg images/*.jpeg || true
-          if git diff --cached --quiet; then
-            echo "No new images to commit."
-          else
-            git commit -m "[sheets-ingest][skip ci] add images from Google Sheets"
+
+          git add images/*.png images/*.jpg images/*.jpeg 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "[scraper] sheets ingest images"
+            git pull --rebase
             git push
+          else
+            echo "No new images from Sheets."
           fi
