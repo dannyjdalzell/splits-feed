@@ -2,7 +2,7 @@ name: OCR Splits
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/15 * * * *"   # every 15 min (UTC)
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: write
@@ -48,20 +48,15 @@ jobs:
         env:
           SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-        run: |
-          python3 scripts/sheets_ingest.py
+        run: python3 scripts/sheets_ingest.py
 
       - name: Pregame scraper (Most Action / Consensus screenshots)
-        run: |
-          python3 scripts/pregame_scraper.py
+        run: python3 scripts/pregame_scraper.py
 
       - name: OCR images -> CSV rows
         env:
           PROFILES_PATH: ${{ env.OCR_PROFILES_FILE }}
-        run: |
-          set -euo pipefail
-          python3 scripts/splits_ocr.py
-          # splits.csv (and optionally splits_clean.csv/flagged.csv) are produced/updated here
+        run: python3 scripts/splits_ocr.py
 
       - name: Merge & push splits.csv without conflicts (dedupe, single header)
         shell: bash
@@ -70,37 +65,35 @@ jobs:
           git config user.name  "splits-bot"
           git config user.email "actions@users.noreply.github.com"
 
-          # If nothing was produced, exit quietly
+          # Nothing produced? bail quietly
           [ -f splits.csv ] || { echo "No splits.csv present, nothing to push."; exit 0; }
 
-          # Save our locally produced CSV
+          # Keep our local CSV
           cp -f splits.csv /tmp/local.csv
 
-          # Fetch the latest remote CSV into /tmp/remote.csv (or empty if not present)
+          # Pull the latest remote CSV content (if it exists)
           git fetch origin main
-          if git ls-remote --exit-code --heads origin main >/dev/null 2>&1 && \
-             git cat-file -e origin/main:splits.csv 2>/dev/null; then
+          if git cat-file -e origin/main:splits.csv 2>/dev/null; then
             git show origin/main:splits.csv > /tmp/remote.csv
           else
             : > /tmp/remote.csv
           fi
 
-          # Build merged file with ONE header and de-duplicated body lines
           header="timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source"
+
+          # Always create body files even if source is empty
+          { tail -n +2 /tmp/remote.csv 2>/dev/null || true; } > /tmp/remote.body
+          { tail -n +2 /tmp/local.csv  2>/dev/null || true; } > /tmp/local.body
+
+          # Rebuild merged CSV: one header + remote body + local new lines, de-duped
           printf "%s\n" "$header" > splits.csv
-
-          # Strip headers if present
-          tail -n +2 /tmp/remote.csv 2>/dev/null || true > /tmp/remote.body || true
-          tail -n +2 /tmp/local.csv  2>/dev/null || true > /tmp/local.body  || true
-
-          # Concatenate and dedupe by full line (stable-ish order: remote first, then local)
-          awk 'NR==FNR{if(!($0 in seen)){seen[$0]=1; print $0} next} {if(!($0 in seen)){seen[$0]=1; print $0}}' \
+          awk 'NR==FNR{ if(!($0 in seen)){seen[$0]=1; print $0}; next} { if(!($0 in seen)){seen[$0]=1; print $0} }' \
               /tmp/remote.body /tmp/local.body >> splits.csv
 
-          # Stage everything we might have
+          # Stage any CSVs we produced
           add_any=false
           for f in splits.csv splits_clean.csv splits_flagged.csv; do
-            [ -f "$f" ] && git add "$f" && add_any=true
+            if [ -f "$f" ]; then git add "$f"; add_any=true; fi
           done
 
           if ! $add_any || git diff --cached --quiet; then
@@ -109,5 +102,4 @@ jobs:
           fi
 
           git commit -m "OCR: append new split rows (merged, deduped)"
-          # Single push (no rebase; we merged from origin/main above)
           git push origin HEAD:main
