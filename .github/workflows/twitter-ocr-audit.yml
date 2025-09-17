@@ -1,0 +1,144 @@
+name: Twitter OCR Audit
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run coverage audit (Tweet sheet ↔ splits CSV)
+        env:
+          TZ: America/Chicago
+          TWITTER_SHEETS_CSV_URL: https://docs.google.com/spreadsheets/d/e/2PACX-1vT39ngJbPzNRjcnKVG-Oehiy4qzyrghIvCI0FQbaBj2jc9LYGLbMUZaCQDGN8Ck_8Q465hqsR4AYz3k/pub?gid=77061416&single=true&output=csv
+        run: |
+          python - <<'PY'
+          import csv, io, os, re, sys, urllib.request, datetime
+          from zoneinfo import ZoneInfo
+
+          NOW = datetime.datetime.now(ZoneInfo("America/Chicago"))
+          CUT = NOW - datetime.timedelta(hours=36)  # lookback
+          SHEET_URL = os.environ["TWITTER_SHEETS_CSV_URL"]
+
+          # ---- helpers
+          def parse_created(s:str):
+              s = (s or "").strip()
+              for fmt in ("%B %d, %Y at %I:%M%p", "%b %d, %Y at %I:%M%p"):
+                  try:
+                      return datetime.datetime.strptime(s, fmt).replace(tzinfo=ZoneInfo("America/Chicago"))
+                  except: pass
+              return None
+
+          def parse_ts(s:str):
+              s = (s or "").strip()
+              for fmt in ("%Y-%m-%dT%H:%M:%S%z","%Y-%m-%dT%H:%M:%S+00:00","%Y-%m-%d %H:%M:%S%z"):
+                  try:
+                      return datetime.datetime.strptime(s, fmt)
+                  except: pass
+              return None
+
+          # ---- family map (handles → *_FAM)
+          FAM = {
+              # DraftKings family
+              "@draftkings":"DK_FAM", "draftkings":"DK_FAM", "vsinlive":"DK_FAM",
+              # MGM family
+              "@betmgm":"MGM_FAM", "betmgm":"MGM_FAM", "betmgmnews":"MGM_FAM",
+              # FanDuel
+              "@fanduel":"FD_FAM", "fanduel":"FD_FAM",
+              # Circa
+              "@circasports":"CIRCA_FAM", "circasports":"CIRCA_FAM",
+              # Caesars
+              "@caesarsportsbook":"CAESARS_FAM", "caesarsportsbook":"CAESARS_FAM", "caesars":"CAESARS_FAM",
+              # SuperBook
+              "@superbooknv":"SUPERBOOK_FAM", "superbooknv":"SUPERBOOK_FAM",
+              # BetOnline / Dave Mason
+              "@davemasonbol":"BOL_FAM", "davemasonbol":"BOL_FAM", "betonline_ag":"BOL_FAM", "betonline":"BOL_FAM",
+              # Covers
+              "@covers":"COVERS_FAM", "covers":"COVERS_FAM",
+              # Bracco / BettingSplits aggregator
+              "@bettingsplits":"BRACCO_FAM", "bettingsplits":"BRACCO_FAM", "bracco":"BRACCO_FAM",
+          }
+
+          # ---- 1) pull the Tweet sheet
+          raw = urllib.request.urlopen(SHEET_URL, timeout=30).read().decode("utf-8", "replace").lstrip("\ufeff")
+          rdr = csv.DictReader(io.StringIO(raw))
+          pct_rx = re.compile(r"\b(\d{1,2}|100)%\b")
+          odds_rx = re.compile(r"(?<!\d)[-+]\d{3,4}(?!\d)")
+
+          by_tweet_fam = {}   # fam -> count of "split-like" tweets in window
+          total_rows = 0
+          window_rows = 0
+          for row in rdr:
+              total_rows += 1
+              created = parse_created(row.get("CreatedAt",""))
+              if not created: continue
+              if created < CUT: continue
+              window_rows += 1
+              text = (row.get("Text","") or "")
+              typ  = (row.get("Type","") or "").upper()
+              user = (row.get("UserName","") or "").strip()
+              uname = user.lower()
+              fam = FAM.get(uname, FAM.get(uname.lstrip("@"), "TW_OTHER_FAM"))
+              # treat as "split-like" if Type says SPLITS or text carries %/odds
+              if typ=="SPLITS" or pct_rx.search(text) or odds_rx.search(text):
+                  by_tweet_fam[fam] = by_tweet_fam.get(fam,0)+1
+
+          # ---- 2) scan repo CSV (what actually landed)
+          repo_csv = "splits_clean.csv" if os.path.exists("splits_clean.csv") else ("splits.csv" if os.path.exists("splits.csv") else None)
+          by_csv_fam = {}
+          csv_rows = 0
+          if repo_csv:
+              with open(repo_csv, "r", encoding="utf-8") as f:
+                  rr = csv.DictReader(f)
+                  for r in rr:
+                      ts = parse_ts(r.get("timestamp",""))
+                      if not ts: continue
+                      if ts.astimezone(ZoneInfo("America/Chicago")) < CUT: continue
+                      src = (r.get("source","") or "").strip()
+                      fam = src if src.endswith("_FAM") else src  # keep 'Pregame' etc.
+                      by_csv_fam[fam] = by_csv_fam.get(fam,0)+1
+                      csv_rows += 1
+
+          # ---- 3) build report
+          os.makedirs("audit", exist_ok=True)
+          path = os.path.join("audit", f"twitter_ocr_audit_{NOW.strftime('%Y%m%d-%H%M%S')}.txt")
+          with open(path, "w", encoding="utf-8") as out:
+              w = out.write
+              w("=== Twitter OCR Coverage Audit ===\n")
+              w(f"Now (America/Chicago): {NOW.isoformat()}\n")
+              w(f"Window start: {CUT.isoformat()}\n")
+              w(f"Tweet sheet rows in window: {window_rows} (total parsed: {total_rows})\n")
+              w(f"CSV rows in window ({repo_csv or 'NONE'}): {csv_rows}\n\n")
+
+              fams = sorted(set(list(by_tweet_fam.keys()) + list(by_csv_fam.keys())))
+              if not fams:
+                  w("No families detected in window; nothing to compare.\n")
+              else:
+                  w("Family | tweets(split-like) | csv_rows | status\n")
+                  w("------ | ------------------- | -------- | ------\n")
+                  for fam in fams:
+                      t = by_tweet_fam.get(fam,0)
+                      c = by_csv_fam.get(fam,0)
+                      status = "PASS" if (t==0 or c>0) else "MISS"
+                      w(f"{fam:14} | {t:7d}               | {c:7d}  | {status}\n")
+
+              # Show Pregame/Consensus presence from CSV view
+              if "Pregame" in by_csv_fam:
+                  w("\nPregame rows present ✓\n")
+              else:
+                  w("\nPregame rows NOT seen in window.\n")
+
+          print("WROTE_REPORT", path)
+          PY
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: twitter-ocr-audit
+          path: audit/twitter_ocr_audit_*.txt
