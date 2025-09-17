@@ -8,6 +8,10 @@ permissions:
 jobs:
   ocr_splits:
     runs-on: ubuntu-latest
+    env:
+      TZ: America/Chicago
+      SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -17,15 +21,42 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
 
-      - name: Debug images & tesseract
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Python deps
         run: |
+          python -m pip install --upgrade pip
+          pip install gspread google-auth google-auth-oauthlib google-auth-httplib2 requests beautifulsoup4 lxml
+
+      - name: Debug before ingest
+        run: |
+          echo "pwd: $(pwd)"
+          echo "Repo tree (top):"
+          ls -la
+          echo "images/ before ingest:"
+          ls -la images || true
+
+      - name: Sheets ingest (download tweet images)
+        env:
+          SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python3 scripts/sheets_ingest.py
+
+      - name: Pregame scraper (Most Action/Consensus screenshots)
+        run: |
+          python3 scripts/pregame_scraper.py
+
+      - name: Debug after ingest/scrape
+        run: |
+          echo "images/ after ingest/scrape:"
           ls -l images || true
-          echo "tesseract version:"
-          tesseract --version || true
+          echo "Count:"; find images -type f | wc -l | sed 's/^/  /'
 
       - name: Run OCR via tesseract CLI
-        env:
-          TZ: America/Chicago
         run: |
           python3 scripts/splits_ocr.py
 
@@ -35,7 +66,6 @@ jobs:
           set -euo pipefail
           git config user.name "splits-bot"
           git config user.email "actions@users.noreply.github.com"
-          # Add only if exists to avoid errors
           [ -f splits.csv ] && git add splits.csv || true
           if ! git diff --cached --quiet; then
             git commit -m "OCR: append new split rows"
