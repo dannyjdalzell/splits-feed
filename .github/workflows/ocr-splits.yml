@@ -18,7 +18,6 @@ concurrency:
 jobs:
   ocr:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,12 +44,15 @@ jobs:
         run: |
           python scripts/splits_ocr.py
 
-      - name: Commit splits.csv (commit-first, then rebase safely)
+      - name: Commit splits.csv and push safely
         run: |
+          set -euo pipefail
+          BRANCH="${GITHUB_REF#refs/heads/}"
+
           git config user.email "bot@local"
           git config user.name "splits-bot"
 
-          # 1) Commit first so the tree is clean
+          # 1) Stage & commit if changed
           git add splits.csv || true
           if ! git diff --cached --quiet; then
             git commit -m "[skip ci] update splits.csv"
@@ -58,13 +60,30 @@ jobs:
             echo "No updates to splits.csv; nothing to commit."
           fi
 
-          # 2) Rebase on remote; if it conflicts, fall back to a merge
-          git fetch origin
-          if ! git rebase origin/main; then
+          # 2) Sync with remote and reapply if needed
+          git fetch origin "$BRANCH"
+          if ! git rebase "origin/$BRANCH"; then
             echo "Rebase conflict; falling back to merge"
             git rebase --abort || true
-            git pull --no-rebase --no-edit
+            git pull --no-rebase --no-edit origin "$BRANCH"
           fi
 
-          # 3) Push whatever we have
-          git push
+          # 3) Push with retry; last resort safe force
+          tries=0
+          until [ $tries -ge 3 ]
+          do
+            if git push origin "HEAD:$BRANCH"; then
+              echo "Push succeeded"; exit 0
+            fi
+            tries=$((tries+1))
+            echo "Push failed (attempt $tries). Refetching & retrying..."
+            git fetch origin "$BRANCH"
+            if ! git rebase "origin/$BRANCH"; then
+              git rebase --abort || true
+              git pull --no-rebase --no-edit origin "$BRANCH"
+            fi
+            sleep 2
+          done
+
+          echo "Final attempt: force-with-lease"
+          git push --force-with-lease origin "HEAD:$BRANCH"
