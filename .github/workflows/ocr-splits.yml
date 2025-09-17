@@ -1,15 +1,12 @@
 name: OCR Splits
-
 on:
   workflow_dispatch:
   schedule:
-    # run every 15 minutes
-    - cron: "*/15 * * * *"
+    - cron: "*/15 * * * *"   # every 15 min (UTC)
 
 permissions:
   contents: write
 
-# prevent two OCR jobs from stepping on each other
 concurrency:
   group: ocr_splits
   cancel-in-progress: false
@@ -20,19 +17,20 @@ env:
 
 jobs:
   ocr_splits:
-    name: ocr_splits
     runs-on: ubuntu-latest
+    env:
+      SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
 
       - name: System deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y tesseract-ocr libtesseract-dev
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -42,48 +40,74 @@ jobs:
       - name: Python deps
         run: |
           python -m pip install --upgrade pip
-          pip install pillow pytesseract opencv-python-headless numpy pandas pyyaml
+          pip install gspread google-auth google-auth-oauthlib google-auth-httplib2 \
+                     requests beautifulsoup4 lxml pillow pytesseract opencv-python-headless \
+                     numpy pandas pyyaml python-dateutil
 
-      - name: Run OCR over images/
+      - name: Sheets ingest (download tweet images)
+        env:
+          SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python3 scripts/sheets_ingest.py
+
+      - name: Pregame scraper (Most Action / Consensus screenshots)
+        run: |
+          python3 scripts/pregame_scraper.py
+
+      - name: OCR images -> CSV rows
         env:
           PROFILES_PATH: ${{ env.OCR_PROFILES_FILE }}
         run: |
           set -euo pipefail
-          python scripts/splits_ocr.py \
-            --images-dir images \
-            --profiles "$PROFILES_PATH" \
-            --out-csv splits.csv
+          python3 scripts/splits_ocr.py
+          # splits.csv (and optionally splits_clean.csv/flagged.csv) are produced/updated here
 
-      # conflict-safe commit/push with retries
-      - name: Commit & push CSV changes (conflict-safe, retry)
+      - name: Merge & push splits.csv without conflicts (dedupe, single header)
         shell: bash
         run: |
           set -euo pipefail
+          git config user.name  "splits-bot"
+          git config user.email "actions@users.noreply.github.com"
 
-          # Stage file if it exists
-          [ -f splits.csv ] && git add splits.csv || true
+          # If nothing was produced, exit quietly
+          [ -f splits.csv ] || { echo "No splits.csv present, nothing to push."; exit 0; }
 
-          # Nothing to commit? bail early
-          if git diff --cached --quiet; then
+          # Save our locally produced CSV
+          cp -f splits.csv /tmp/local.csv
+
+          # Fetch the latest remote CSV into /tmp/remote.csv (or empty if not present)
+          git fetch origin main
+          if git ls-remote --exit-code --heads origin main >/dev/null 2>&1 && \
+             git cat-file -e origin/main:splits.csv 2>/dev/null; then
+            git show origin/main:splits.csv > /tmp/remote.csv
+          else
+            : > /tmp/remote.csv
+          fi
+
+          # Build merged file with ONE header and de-duplicated body lines
+          header="timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source"
+          printf "%s\n" "$header" > splits.csv
+
+          # Strip headers if present
+          tail -n +2 /tmp/remote.csv 2>/dev/null || true > /tmp/remote.body || true
+          tail -n +2 /tmp/local.csv  2>/dev/null || true > /tmp/local.body  || true
+
+          # Concatenate and dedupe by full line (stable-ish order: remote first, then local)
+          awk 'NR==FNR{if(!($0 in seen)){seen[$0]=1; print $0} next} {if(!($0 in seen)){seen[$0]=1; print $0}}' \
+              /tmp/remote.body /tmp/local.body >> splits.csv
+
+          # Stage everything we might have
+          add_any=false
+          for f in splits.csv splits_clean.csv splits_flagged.csv; do
+            [ -f "$f" ] && git add "$f" && add_any=true
+          done
+
+          if ! $add_any || git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
 
-          git config user.name "splits-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git commit -m "OCR: append new split rows"
-
-          # pull --rebase + push with backoff to avoid push races
-          n=0
-          until [ $n -ge 5 ]; do
-            if git pull --rebase --autostash && git push; then
-              echo "Push OK"
-              exit 0
-            fi
-            n=$((n+1))
-            echo "Push race, retry $n/5…"
-            sleep $((2*n))
-          done
-
-          echo "Push still failing after retries"
-          exit 1
+          git commit -m "OCR: append new split rows (merged, deduped)"
+          # Single push (no rebase; we merged from origin/main above)
+          git push origin HEAD:main
