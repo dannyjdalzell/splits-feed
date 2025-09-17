@@ -10,86 +10,80 @@ URL = "https://www.pregame.com/game-center/consensus"
 TS = int(time.time())
 OUTFILE = SAVE_DIR / f"pregame_most_action_{TS}.png"
 
-UA = (
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/126.0.0.0 Safari/537.36"
-)
+UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6) "
+      "AppleWebKit/537.36 (KHTML, like Gecko) "
+      "Chrome/126.0.0.0 Safari/537.36")
 
-MOST_ACTION_TAB_SELECTORS = [
-    "role=tab[name=/Most Action/i]",
-    "role=tab[name=/Most Bet/i]",
-    "text=/Most Action/i",
-    "text=/Most Bet/i",
+TAB_SEL = [
+    "role=tab[name=/Most Action/i]", "role=tab[name=/Most Bet/i]",
+    "text=/Most Action/i", "text=/Most Bet/i",
 ]
 
-TABLE_KEYWORDS = ["Most Action","Most Bet","Cash %","Ticket %","Tickets %","Handle %","Consensus"]
-TABLE_SELECTORS = ["table","[role='table']","section","div"]
+KEYWORDS = ["Most Action","Most Bet","Cash %","Ticket %","Tickets %","Handle %","Consensus"]
+SEL = ["table","[role='table']","section","div"]
 
 def click_first(page, selectors, timeout=4000):
-    for sel in selectors:
+    for s in selectors:
         try:
-            loc = page.locator(sel)
+            loc = page.locator(s)
             if loc.count() > 0:
-                loc.first.click(timeout=timeout); return sel
+                loc.first.click(timeout=timeout); return True
         except Exception: pass
-    return None
+    return False
 
-def element_contains_keywords(el, keywords)->bool:
-    try: text = el.inner_text(timeout=1000)
+def contains_any(el, words):
+    try: t = el.inner_text(timeout=800).lower()
     except Exception: return False
-    tl = text.lower()
-    return any(k.lower() in tl for k in keywords)
+    return any(w.lower() in t for w in words)
 
-def find_best_table(page):
-    cands=[]
-    for sel in TABLE_SELECTORS:
+def best_table(page):
+    cands = []
+    for s in SEL:
         try:
-            loc=page.locator(sel); n=loc.count()
-            for i in range(min(n,20)): cands.append(loc.nth(i))
+            loc = page.locator(s); n = loc.count()
+            for i in range(min(n, 20)): cands.append(loc.nth(i))
         except Exception: pass
-    scored=[]
+    scored = []
     for el in cands:
         try:
-            if not element_contains_keywords(el, TABLE_KEYWORDS): continue
+            if not contains_any(el, KEYWORDS): continue
             try: rows = el.locator("tr").count()
-            except Exception: rows=0
+            except Exception: rows = 0
             try: role = el.get_attribute("role") or ""
-            except Exception: role=""
-            score = (2 if role=="table" else 0) + min(rows,50)
+            except Exception: role = ""
+            score = (2 if role == "table" else 0) + min(rows, 50)
             scored.append((score, rows, role=="table", el))
         except Exception: pass
-    if not scored: return None, []
+    if not scored: return None
     scored.sort(key=lambda t:t[0], reverse=True)
-    return scored[0][3], scored
+    return scored[0][3]
 
 def main():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
-        ctx = browser.new_context(viewport={"width":1600,"height":1200}, user_agent=UA, java_script_enabled=True)
+        b = p.chromium.launch(headless=True, args=["--no-sandbox"])
+        ctx = b.new_context(viewport={"width":1600,"height":1200}, user_agent=UA, java_script_enabled=True)
         page = ctx.new_page()
         try: page.goto(URL, timeout=60000, wait_until="domcontentloaded")
         except PWTimeout: page.goto(URL, timeout=90000)
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(2500)
 
-        click_first(page, ["button:has-text('Accept')","button:has-text('I Accept')","button:has-text('Agree')","[aria-label='accept']"], timeout=2000)
+        # cookie banners (best-effort)
+        click_first(page, ["button:has-text('Accept')","button:has-text('I Accept')","button:has-text('Agree')","[aria-label='accept']"], 2000)
 
-        clicked = click_first(page, MOST_ACTION_TAB_SELECTORS, timeout=4000)
-        if clicked: print(f"[scraper] clicked tab: {clicked}"); page.wait_for_timeout(2000)
+        # Most Action tab
+        if click_first(page, TAB_SEL, 4000):
+            page.wait_for_timeout(1500)
 
-        try: page.mouse.wheel(0,600); page.wait_for_timeout(800)
+        # small scroll helps lazy content
+        try: page.mouse.wheel(0,600); page.wait_for_timeout(600)
         except Exception: pass
 
-        best, diag = find_best_table(page)
-        if diag:
-            top = diag[0]
-            print(f"[scraper] candidates={len(diag)} best_score={top[0]} rows={top[1]} aria_table={top[2]}")
-
-        if best:
-            best.screenshot(path=str(OUTFILE)); print(f"[OK] Saved MOST ACTION -> {OUTFILE}")
+        el = best_table(page)
+        if el:
+            el.screenshot(path=str(OUTFILE)); print(f"[OK] MOST ACTION -> {OUTFILE}")
         else:
-            page.screenshot(path=str(OUTFILE), full_page=True); print(f"[WARN] No table; saved full page -> {OUTFILE}")
-        browser.close()
+            page.screenshot(path=str(OUTFILE), full_page=True); print(f"[WARN] fallback full page -> {OUTFILE}")
+        b.close()
 
 if __name__ == "__main__":
     main()
