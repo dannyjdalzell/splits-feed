@@ -7,7 +7,7 @@ on:
       - 'scripts/**'
       - '.github/workflows/ocr-splits.yml'
   workflow_dispatch:
-
+  
 permissions:
   contents: write
 
