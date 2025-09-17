@@ -53,7 +53,6 @@ jobs:
 
           git config user.email "bot@local"
           git config user.name "splits-bot"
-
           git fetch origin "$BRANCH" --depth=1 || true
 
           mkdir -p /tmp/merge_splits
@@ -66,41 +65,47 @@ jobs:
           [ -f splits.csv ] || : > splits.csv
           cp splits.csv /tmp/merge_splits/local.csv
 
-          python - <<'PY'
-import pandas as pd
-from pathlib import Path
+          cat > /tmp/merge_splits/merge.py <<'PY'
+          import pandas as pd
+          from pathlib import Path
 
-COLUMNS=["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"]
+          COLUMNS = ["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"]
 
-def load(p: Path):
-    try:
-        if not p.exists() or p.stat().st_size == 0:
-            return pd.DataFrame(columns=COLUMNS)
-        return pd.read_csv(p, dtype=str, keep_default_na=False)
-    except Exception:
-        return pd.DataFrame(columns=COLUMNS)
+          def load(p: Path):
+              try:
+                  if not p.exists() or p.stat().st_size == 0:
+                      return pd.DataFrame(columns=COLUMNS)
+                  return pd.read_csv(p, dtype=str, keep_default_na=False)
+              except Exception:
+                  return pd.DataFrame(columns=COLUMNS)
 
-remote = load(Path("/tmp/merge_splits/remote.csv"))
-local  = load(Path("/tmp/merge_splits/local.csv"))
-all_rows = pd.concat([remote, local], ignore_index=True)
+          remote = load(Path("/tmp/merge_splits/remote.csv"))
+          local  = load(Path("/tmp/merge_splits/local.csv"))
 
-for c in all_rows.columns:
-    if all_rows[c].dtype == object:
-        all_rows[c] = all_rows[c].astype(str).str.strip()
+          all_rows = pd.concat([remote, local], ignore_index=True)
 
-all_rows = all_rows.drop_duplicates()
-if "timestamp" in all_rows.columns:
-    all_rows = all_rows.sort_values("timestamp")
+          for c in all_rows.columns:
+              if all_rows[c].dtype == object:
+                  all_rows[c] = all_rows[c].astype(str).str.strip()
 
-all_rows.to_csv("splits.csv", index=False)
-print(f"[merge] remote={len(remote)} local={len(local)} -> out={len(all_rows)}")
-PY
+          all_rows = all_rows.drop_duplicates()
+          if "timestamp" in all_rows.columns:
+              try:
+                  all_rows = all_rows.sort_values("timestamp")
+              except Exception:
+                  pass
+
+          all_rows.to_csv("splits.csv", index=False)
+          print(f"[merge] remote={len(remote)} local={len(local)} -> out={len(all_rows)}")
+          PY
+
+          python3 /tmp/merge_splits/merge.py
 
           git add splits.csv
           git commit -m "[skip ci] merge/append splits.csv" || echo "No changes to commit."
 
-          # push with one retry, then force-with-lease
-          git push origin "HEAD:$BRANCH" || {
+          # push with one retry, then force-with-lease as last resort
+          if ! git push origin "HEAD:$BRANCH"; then
             git fetch origin "$BRANCH" --depth=1 || true
             git push --force-with-lease origin "HEAD:$BRANCH"
-          }
+          fi
