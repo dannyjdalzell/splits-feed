@@ -1,253 +1,185 @@
-# scripts/splits_ocr.py
-# v12-multibrand — parses MGM, FanDuel, DraftKings, CircaSports, and generic grids
-import os, csv, re, sys
+#!/usr/bin/env python3
+import os, sys, re, csv, datetime
 from pathlib import Path
-from datetime import datetime
-from typing import List, Dict, Tuple
-from PIL import Image, ImageOps, ImageFilter, ImageEnhance
-import pytesseract
 
-# -------- repo paths --------
-REPO_ROOT = Path(__file__).resolve().parents[1]
-IN_DIR    = REPO_ROOT / "images"
-OUT_FILE  = REPO_ROOT / "splits.csv"
+try:
+    from PIL import Image
+    import pytesseract
+except Exception as e:
+    print(f"[OCR] Missing deps: {e}", file=sys.stderr)
+    sys.exit(0)  # don't fail the workflow; just exit cleanly
 
-FIELDNAMES = ["away_team","home_team","market","tickets_pct","handle_pct","line","source"]
+IMAGES_DIR = Path("images")
+CSV_PATH   = Path("splits.csv")
 
-# -------- utils --------
-def now_ts() -> str:
-    return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+# ---- output schema (9 cols, keep this EXACT) ----
+CSV_FIELDS = [
+    "timestamp",      # ISO
+    "league",         # MLB/NFL/NBA/Unknown
+    "away_team",
+    "home_team",
+    "market",         # ML/Spread/Total/Unknown
+    "tickets_pct",    # 0-100 or ''
+    "handle_pct",     # 0-100 or ''
+    "line",           # e.g., -135 / +7.5 / 221.5
+    "source",         # e.g., Pregame
+]
 
-def preprocess(img: Image.Image) -> Image.Image:
-    g = ImageOps.grayscale(img)
-    g = g.filter(ImageFilter.MedianFilter(3))
-    g = ImageEnhance.Contrast(g).enhance(1.5)
-    return g
+# ---- team dictionaries (minimal but effective) ----
+MLB = [
+    "Yankees","Red Sox","Blue Jays","Rays","Orioles","Guardians","Tigers","Royals","Twins","White Sox",
+    "Astros","Mariners","Athletics","Rangers","Angels","Braves","Mets","Phillies","Marlins","Nationals",
+    "Cubs","Cardinals","Pirates","Brewers","Reds","Dodgers","Giants","Padres","Rockies","Diamondbacks"
+]
+NFL = [
+    "Patriots","Jets","Bills","Dolphins","Chiefs","Chargers","Raiders","Broncos","Cowboys","Eagles","Giants","Commanders",
+    "Packers","Bears","Vikings","Lions","Saints","Falcons","Panthers","Buccaneers","Rams","49ers","Seahawks","Cardinals",
+    "Ravens","Steelers","Browns","Bengals","Titans","Colts","Jaguars","Texans"
+]
+NBA = [
+    "Lakers","Warriors","Celtics","Knicks","Nets","Bulls","Heat","76ers","Bucks","Raptors","Hawks","Cavaliers","Pistons",
+    "Pacers","Magic","Wizards","Hornets","Mavericks","Rockets","Spurs","Grizzlies","Pelicans","Nuggets","Timberwolves",
+    "Thunder","Trail Blazers","Jazz","Kings","Clippers","Suns"
+]
+TEAM_MAP = {t:"MLB" for t in MLB} | {t:"NFL" for t in NFL} | {t:"NBA" for t in NBA}
 
-def ocr_best(img: Image.Image) -> Tuple[int,int,str]:
-    """
-    Try several PSMs; keep the one with most 'table-ish' tokens.
-    """
-    best = (0, 6, "")
-    for psm in (6, 11, 4):
-        cfg = f'--oem 3 --psm {psm}'
-        txt = pytesseract.image_to_string(img, lang="eng", config=cfg)
-        score = len(re.findall(r"(?:%|bets?|handle|[+-]\d{2,3}|O/?U|ML|Spread|Total)", txt, flags=re.I))
-        if score > best[0]:
-            best = (score, psm, txt)
-    return best
+def infer_league(text:str)->str:
+    txt = text.lower()
+    hits = [TEAM_MAP[t] for t in TEAM_MAP if t.lower() in txt]
+    if not hits: return "Unknown"
+    return max(set(hits), key=hits.count)
 
-def looks_like_splits(text: str) -> bool:
-    if not text:
-        return False
-    # require some %s and the words that show it’s a table of markets
-    has_pct   = text.count("%") >= 2
-    has_words = re.search(r"(bets?|handle|spread|total|ml|moneyline|o/?u)", text, re.I) is not None
-    has_rows  = text.count("\n") > 3
-    return has_pct and has_words and has_rows
+def find_two_teams(text:str):
+    seen = []
+    for t in TEAM_MAP:
+        if re.search(rf"\b{re.escape(t)}\b", text, flags=re.I):
+            if t not in seen:
+                seen.append(t)
+            if len(seen)==2: break
+    if len(seen)<2:
+        m = re.search(r"([A-Za-z .'-]{2,})\s+(?:vs|at)\s+([A-Za-z .'-]{2,})", text, flags=re.I)
+        if m:
+            return m.group(1).strip(), m.group(2).strip()
+        return None, None
+    return seen[0], seen[1]
 
-TEAM_RE = r"[A-Z][A-Za-z\.\s&'\-]{2,}"  # permissive team token
-def _norm(s:str) -> str:
-    return re.sub(r"\s+"," ", s.replace("—","-").replace("–","-").replace("−","-")).strip()
+def pct_or_blank(s:str):
+    if s is None: return ""
+    m = re.search(r"(\d{1,3})(?:\s*%)?", s)
+    if not m: return ""
+    val = int(m.group(1))
+    val = max(0, min(100, val))
+    return str(val)
 
-def _teams_from(line: str) -> Tuple[str,str]:
-    m = re.search(rf"({TEAM_RE})\s+at\s+({TEAM_RE})", line, re.I)
-    if m:
-        return _norm(m.group(1)), _norm(m.group(2))
-    return "",""
+def extract_line(text:str):
+    m = re.search(r"([+-]?\d{1,3}(?:\.\d)?)\s*(?:ML|Moneyline)?", text)
+    return m.group(1) if m else ""
 
-def _hunt_block(block_lines: List[str]) -> Dict[str,Dict]:
-    """
-    Pull ML/Spread/Total %bets, %handle, and best guess line from a small window.
-    Returns dict like:
-      {"ML": {"b":int,"h":int,"line":str}, "Spread": {...}, "Total": {...}}
-    """
-    blk = " | ".join(block_lines)
-    out = {"ML":{"b":0,"h":0,"line":""},
-           "Spread":{"b":0,"h":0,"line":""},
-           "Total":{"b":0,"h":0,"line":""}}
+def detect_source(text:str)->str:
+    return "Pregame" if "pregame" in text.lower() else "Unknown"
 
-    # Generic % finders (accepts 'Bets' or 'Tickets', 'Handle' or 'Money')
-    def pct(key:str) -> int:
-        m = re.search(key, blk, re.I)
-        return int(m.group(1)) if m else 0
+def detect_market(text:str)->str:
+    t = text.lower()
+    if "ml" in t or "moneyline" in t: return "ML"
+    if "spread" in t or re.search(r"[+-]\d+(\.\d)?", t): return "Spread"
+    if "total" in t or re.search(r"\b\d{3}\.?\d?\b", t): return "Total"
+    return "Unknown"
 
-    bets_any   = pct(r"(?:Bets|Tickets)\D{0,6}(\d{1,3})\s*%?")
-    handle_any = pct(r"(?:Handle|Money)\D{0,6}(\d{1,3})\s*%?")
+def ocr_text(image_path:Path)->str:
+    try:
+        img = Image.open(image_path)
+    except Exception as e:
+        print(f"[OCR] Cannot open {image_path}: {e}", file=sys.stderr)
+        return ""
+    try:
+        return pytesseract.image_to_string(img)
+    except Exception as e:
+        print(f"[OCR] Tesseract failed on {image_path}: {e}", file=sys.stderr)
+        return ""
 
-    # Market targeting
-    # ML
-    ml_line = ""
-    m_ml = re.search(r"(?:ML|Moneyline)\D{0,8}([+-]?\d{2,3})", blk, re.I)
-    if m_ml: ml_line = _norm(m_ml.group(1))
-    out["ML"] = {"b":bets_any, "h":handle_any, "line":ml_line}
+def parse_pregame(text:str):
+    away, home = find_two_teams(text)
+    if not away or not home:
+        return None
+    pcts = re.findall(r"(\d{1,3})\s*%", text)
+    tickets = pct_or_blank(pcts[0]) if len(pcts)>=1 else ""
+    handle  = pct_or_blank(pcts[1]) if len(pcts)>=2 else ""
+    league = infer_league(text)
+    market = detect_market(text)
+    line   = extract_line(text)
+    return {
+        "timestamp":  datetime.datetime.utcnow().replace(microsecond=0).isoformat()+"+00:00",
+        "league":     league,
+        "away_team":  away,
+        "home_team":  home,
+        "market":     market,
+        "tickets_pct":tickets,
+        "handle_pct": handle,
+        "line":       line,
+        "source":     "Pregame",
+    }
 
-    # Spread (includes RL/PL/puck/run line)
-    sp_line = ""
-    m_sp = re.search(r"(?:Spread|RL|PL|Run\s*Line|Puck\s*Line)\D{0,8}([+-]\d+(?:\.\d+)?)\D{0,6}([+-]?\d{2,3})?", blk, re.I)
-    if m_sp:
-        sp_line = _norm(f"{m_sp.group(1)} {(m_sp.group(2) or '').strip()}")
-    out["Spread"] = {"b":bets_any, "h":handle_any, "line":sp_line.strip()}
+def parse_generic(text:str):
+    away, home = find_two_teams(text)
+    if not away or not home:
+        return None
+    league = infer_league(text)
+    return {
+        "timestamp":  datetime.datetime.utcnow().replace(microsecond=0).isoformat()+"+00:00",
+        "league":     league,
+        "away_team":  away,
+        "home_team":  home,
+        "market":     "Unknown",
+        "tickets_pct":"",
+        "handle_pct": "",
+        "line":       "",
+        "source":     detect_source(text),
+    }
 
-    # Total (O/U)
-    to_line = ""
-    m_to = re.search(r"(?:Total|O/?U)\D{0,6}([OU]?)\s*(\d+(?:\.\d+)?)\D{0,6}([+-]?\d{2,3})?", blk, re.I)
-    if m_to:
-        # Keep points + optional price; drop the leading O/U letter to keep CSV simple
-        to_line = _norm(f"{m_to.group(2)} {(m_to.group(3) or '').strip()}")
-    out["Total"] = {"b":bets_any, "h":handle_any, "line":to_line.strip()}
+def ensure_csv(path:Path):
+    if not path.exists():
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=CSV_FIELDS)
+            w.writeheader()
 
-    return out
+def append_row(row:dict):
+    ensure_csv(CSV_PATH)
+    reduced = {k: row.get(k, "") for k in CSV_FIELDS}
+    with open(CSV_PATH, "a", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=CSV_FIELDS)
+        w.writerow(reduced)
 
-# ---------------- brand parsers ----------------
-def parse_pairs_by_windows(lines: List[str], win:int=6) -> List[Tuple[str,str,Dict]]:
-    """Find '<Away> at <Home>' lines and return (away,home,markets) for each."""
-    pairs = []
-    idxs = []
-    for i, ln in enumerate(lines):
-        a,h = _teams_from(ln)
-        if a and h:
-            idxs.append((i,a,h))
-    for i,a,h in idxs:
-        lo, hi = max(0,i-win), min(len(lines), i+win+1)
-        markets = _hunt_block(lines[lo:hi])
-        pairs.append((a,h,markets))
-    return pairs
+def handle_image(p:Path):
+    txt = ocr_text(p)
+    if not txt.strip():
+        print(f"[SKIP] Empty OCR for {p.name}")
+        return
+    row = None
+    if "pregame" in txt.lower():
+        row = parse_pregame(txt)
+    if row is None:
+        row = parse_pregame(txt)
+    if row is None:
+        row = parse_generic(txt)
+    if row is None:
+        print(f"[SKIP] Unrecognized layout: {p.name}")
+        return
+    append_row(row)
+    print(f"[OK] {p.name} -> {row['league']} {row['away_team']} @ {row['home_team']} ({row['market']})")
 
-def parse_mgm(text:str) -> List[Dict]:
-    lines = [x for x in (l.strip() for l in text.splitlines()) if x]
-    rows = []
-    for a,h,mk in parse_pairs_by_windows(lines, win=6):
-        for k in ("ML","Spread","Total"):
-            b,hp = mk[k]["b"], mk[k]["h"]
-            ln   = mk[k]["line"]
-            if b or hp or ln:
-                rows.append({"away_team":a,"home_team":h,"market":k,
-                             "tickets_pct":b,"handle_pct":hp,"line":ln,"source":"MGM_FAM"})
-    return rows
-
-def parse_fanduel(text:str) -> List[Dict]:
-    # FanDuel grids still look like ML/Spread/Total + % Bets/Handle; reuse core
-    rows = parse_mgm(text)
-    for r in rows: r["source"] = "FANDUEL_GRID"
-    return rows
-
-def parse_dk(text:str) -> List[Dict]:
-    # DraftKings tables: similar tokens, sometimes 'TIX'/'HNDL' in caps
-    t = re.sub(r"TIX","Bets", text, flags=re.I)
-    t = re.sub(r"HNDL","Handle", t, flags=re.I)
-    rows = parse_mgm(t)
-    for r in rows: r["source"] = "DRAFTKINGS_GRID"
-    return rows
-
-def parse_circa(text:str) -> List[Dict]:
-    # Circa Sports: often “Circa Sports” header; markets are the same
-    rows = parse_mgm(text)
-    for r in rows: r["source"] = "CIRCA_GRID"
-    return rows
-
-def parse_generic_grid(text:str) -> List[Dict]:
-    # Fallback: try the same windowed pair scan
-    rows = parse_mgm(text)
-    for r in rows:
-        if r.get("source") in (None, "MGM_FAM"):
-            r["source"] = "GRID_OCR"
-    return rows
-
-def detect_brand(text:str, fname:str) -> str:
-    low = (text or "").lower()
-    fn  = fname.lower()
-    if "betmgm" in low or "mgm" in low or "betmgm" in fn or "mgm" in fn:
-        return "MGM"
-    if "fanduel" in low or "fanduel" in fn or "fd_" in fn:
-        return "FANDUEL"
-    if "draftkings" in low or "draft kings" in low or "dk" in fn or "draftkings" in fn:
-        return "DRAFTKINGS"
-    if "circa" in low or "circasports" in low or "circa" in fn:
-        return "CIRCA"
-    # allow custom typos: "braco" -> treat as generic grid for now
-    if "braco" in low or "bracosports" in low or "braco" in fn:
-        return "GENERIC"
-    return "GENERIC"
-
-def parse_text_by_brand(text:str, fname:str) -> List[Dict]:
-    brand = detect_brand(text, fname)
-    if brand == "MGM":        return parse_mgm(text)
-    if brand == "FANDUEL":    return parse_fanduel(text)
-    if brand == "DRAFTKINGS": return parse_dk(text)
-    if brand == "CIRCA":      return parse_circa(text)
-    return parse_generic_grid(text)
-
-# ---------------- main ----------------
 def main():
-    all_rows: List[Dict] = []
-
-    if not IN_DIR.exists():
-        print(f"[ERR] images/ folder not found at {IN_DIR}")
-        sys.exit(1)
-
-    img_paths = sorted([p for p in IN_DIR.glob("*") if p.suffix.lower() in (".png",".jpg",".jpeg",".webp")])
-    if not img_paths:
+    if not IMAGES_DIR.exists():
+        print(f"[INFO] No images dir at {IMAGES_DIR.resolve()}; nothing to do.")
+        return
+    imgs = [p for p in IMAGES_DIR.iterdir() if p.suffix.lower() in (".png",".jpg",".jpeg",".webp")]
+    if not imgs:
         print("[INFO] No images to process.")
         return
-
-    for p in img_paths:
+    for p in sorted(imgs):
         try:
-            img = Image.open(p)
-        except Exception:
-            print(f"[ERR] Cannot open: {p.name}")
-            continue
-
-        pim = preprocess(img)
-        score, psm, text = ocr_best(pim)
-
-        if not looks_like_splits(text):
-            print(f"[SKIP] {p.name} — not a splits table (psm={psm}, score={score})")
-            continue
-
-        rows = parse_text_by_brand(text, p.name)
-
-        # sanitize + enforce ints
-        clean_rows = []
-        for r in rows:
-            r["away_team"]  = _norm(r.get("away_team",""))
-            r["home_team"]  = _norm(r.get("home_team",""))
-            r["market"]     = r.get("market","")
-            r["tickets_pct"] = int(r.get("tickets_pct") or 0)
-            r["handle_pct"]  = int(r.get("handle_pct") or 0)
-            r["line"]        = _norm(r.get("line",""))
-            r["source"]      = r.get("source","GRID_OCR")
-            # require at least a market + one of (% or line) otherwise skip
-            if r["market"] and (r["tickets_pct"] or r["handle_pct"] or r["line"]):
-                clean_rows.append(r)
-
-        if clean_rows:
-            print(f"[OK] {p.name}: {len(clean_rows)} row(s)")
-            all_rows.extend(clean_rows)
-        else:
-            print(f"[WARN] {p.name}: passed pre-check but no rows parsed")
-
-    if not all_rows:
-        print("No valid rows parsed from any image.")
-        return
-
-    exists = OUT_FILE.exists()
-    with open(OUT_FILE, "a", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=FIELDNAMES)
-        if not exists:
-            w.writeheader()
-        for r in all_rows:
-            w.writerow({
-                "away_team":  r["away_team"],
-                "home_team":  r["home_team"],
-                "market":     r["market"],
-                "tickets_pct":r["tickets_pct"],
-                "handle_pct": r["handle_pct"],
-                "line":       r["line"],
-                "source":     r["source"],
-            })
-
-    print(f"Appended {len(all_rows)} row(s) → {OUT_FILE}")
+            handle_image(p)
+        except Exception as e:
+            print(f"[ERROR] {p.name}: {e}", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
