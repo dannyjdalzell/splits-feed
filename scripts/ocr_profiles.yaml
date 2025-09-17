@@ -1,86 +1,17 @@
-# OCR routing + column synonyms per sportsbook family
 common:
   time_tolerance_minutes: 15
-  min_row_tokens: 3
-  percent_tokens: ["% Bets","Bets %","Tickets %","% Handle","Handle %","% Bet","% Handle"]
+  percent_tokens: ["% Bets","Bets %","Tickets %","Ticket %","% Handle","Handle %","% Bet","%Handle"]
   market_tokens:
     moneyline:  ["Moneyline","ML","Money","Money Line"]
     spread:     ["Spread","Point Spread","Runline","Puck Line","RL","PL","Handicap"]
     total:      ["Total","Totals","O/U","Over/Under","Over Under","OU"]
-  column_synonyms:
-    bets:   ["% Bets","Bets %","Tickets %","Ticket %","%Bet","Ticket%"]
-    handle: ["% Handle","Handle %","%Handle","Handle%"]
-    open:   ["Open","Opening","Op","Opn"]
-    curr:   ["Current","Now","Live","Curr"]
-
 families:
-  DK_FAM:
-    detect_any:
-      - "DraftKings"
-      - "DRAFTKINGS"
-      - "DK"
-      - "Moneyline"
-      - "Handle %"
-      - "Bets %"
-    team_hints: ["@"," at "," vs "," vs. "]
-  FD_FAM:
-    detect_any:
-      - "FanDuel"
-      - "FD Sportsbook"
-      - "FANDUEL"
-      - "Moneyline"
-      - "Handle %"
-      - "Bets %"
-    team_hints: ["@"," at "," vs "," vs. "]
-  CIRCA_FAM:
-    detect_any:
-      - "Circa Sports"
-      - "CIRCA SPORTS"
-      - "Expanded Splits"
-      - "Moneyline"
-    team_hints: ["@"," at "," vs "," vs. "]
-  MGM_FAM:
-    detect_any:
-      - "BetMGM"
-      - "MLB Games"
-      - "Opening"
-      - "Current"
-      - "%Bets"
-      - "%Handle"
-    team_hints: ["@"," at "," vs "," vs. "]
-  CAESARS_FAM:
-    detect_any:
-      - "Caesars Sportsbook"
-      - "Caesars"
-      - "% Bets"
-      - "% Handle"
-    team_hints: ["@"," at "," vs "," vs. "]
-  SUPERBOOK_FAM:
-    detect_any:
-      - "SuperBook"
-      - "Westgate"
-      - "% Bets"
-      - "% Handle"
-    team_hints: ["@"," at "," vs "," vs. "]
-  BRACCO_FAM:
-    detect_any:
-      - "Expanded Splits"
-      - "Betting Splits"
-      - "Bracco"
-      - "% Bets"
-      - "% Handle"
-    team_hints: ["@"," at "," vs "," vs. "]
-  BOL_FAM:
-    detect_any:
-      - "BetOnline"
-      - "BOL"
-      - "Dave Mason"
-      - "% Bets"
-      - "% Handle"
-    team_hints: ["@"," at "," vs "," vs. "]
-  COVERS_FAM:
-    detect_any:
-      - "Covers.com"
-      - "Covers"
-      - "Consensus"
-    team_hints: ["@"," at "," vs "," vs. "]
+  DK_FAM:       { detect_any: ["DraftKings","DRAFTKINGS","DK","Bets %","Handle %"] }
+  FD_FAM:       { detect_any: ["FanDuel","FANDUEL","FD Sportsbook","Bets %","Handle %"] }
+  CIRCA_FAM:    { detect_any: ["Circa Sports","CIRCA SPORTS","Expanded Splits","Moneyline"] }
+  MGM_FAM:      { detect_any: ["BetMGM","MLB Games","Opening","Current","%Bets","%Handle"] }
+  CAESARS_FAM:  { detect_any: ["Caesars Sportsbook","Caesars","% Bets","% Handle"] }
+  SUPERBOOK_FAM:{ detect_any: ["SuperBook","Westgate","% Bets","% Handle"] }
+  BRACCO_FAM:   { detect_any: ["Betting Splits","Bracco","% Bets","% Handle"] }
+  BOL_FAM:      { detect_any: ["BetOnline","BOL","Dave Mason","% Bets","% Handle"] }
+  COVERS_FAM:   { detect_any: ["Covers","Covers.com","Consensus"] }
