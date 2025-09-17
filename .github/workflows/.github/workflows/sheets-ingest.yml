@@ -1,0 +1,96 @@
+name: Sheets Ingest (manual)
+
+on:
+  workflow_dispatch: {}   # button-only (no schedule)
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib requests
+
+      - name: Sheets → images/ (download any new image URLs)
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SPLITS_TWEETS_SHEET_ID:     ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+          SPLITS_TWEETS_TAB:          ${{ vars.SPLITS_TWEETS_TAB || 'Tweets' }}
+        run: |
+          python - <<'PY'
+          import os, sys, csv, time, json, hashlib
+          from pathlib import Path
+          from urllib.parse import urlparse
+          import requests
+          from google.oauth2.service_account import Credentials
+          from googleapiclient.discovery import build
+
+          SHEET_ID   = os.environ["SPLITS_TWEETS_SHEET_ID"].strip()
+          SHEET_TAB  = os.environ.get("SPLITS_TWEETS_TAB","Tweets")
+          SAVE_DIR   = Path("images"); SAVE_DIR.mkdir(parents=True, exist_ok=True)
+          STATE_FILE = Path("state/sheets_ingest_seen.txt"); STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+          TWEETS_CSV = Path("tweets.csv")
+
+          sa_info = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+          creds = Credentials.from_service_account_info(sa_info, scopes=["https://www.googleapis.com/auth/spreadsheets.readonly"])
+          svc = build("sheets","v4",credentials=creds)
+
+          res = svc.spreadsheets().values().get(spreadsheetId=SHEET_ID, range=f"{SHEET_TAB}!A:Z").execute()
+          values = res.get("values", [])
+          if not values: 
+              print("[INGEST] no rows"); sys.exit(0)
+
+          headers = [h.strip().lower() for h in values[0]]
+          def rowdict(r): return { headers[i]: r[i] for i in range(min(len(headers), len(r))) }
+
+          def sha16(s): return hashlib.sha256(s.encode()).hexdigest()[:16]
+          def done(k): 
+              return STATE_FILE.exists() and k in {l.strip() for l in STATE_FILE.read_text().splitlines()}
+          def mark(k): STATE_FILE.write_text((STATE_FILE.read_text() if STATE_FILE.exists() else "") + k + "\n")
+
+          if not TWEETS_CSV.exists(): TWEETS_CSV.write_text("timestamp,image_url,text\n")
+
+          added=0
+          with open(TWEETS_CSV, "a", newline="") as f:
+              w=csv.writer(f)
+              for r in map(rowdict, values[1:]):
+                  img=(r.get("image_url") or r.get("image") or "").strip()
+                  if not img: continue
+                  key=sha16(img)
+                  if done(key): continue
+                  try:
+                      ext=(urlparse(img).path.split(".")[-1] or "jpg").lower()
+                      if ext not in ("png","jpg","jpeg","webp"): ext="jpg"
+                      out=SAVE_DIR/f"sheet_{key}.{ext}"
+                      resp=requests.get(img, timeout=30); resp.raise_for_status()
+                      out.write_bytes(resp.content)
+                      w.writerow([r.get("timestamp") or r.get("time") or str(int(time.time())), img, r.get("text") or r.get("tweet") or ""])
+                      mark(key); added+=1
+                      print(f"[INGEST] saved {out}")
+                  except Exception as e:
+                      print(f"[WARN] {img}: {e}")
+          print(f"[INGEST] new images: {added}")
+          PY
+
+      - name: Commit & push any new images (triggers OCR)
+        run: |
+          git config user.email "bot@local"
+          git config user.name  "splits-bot"
+          git add images/*.png images/*.jpg images/*.jpeg images/*.webp tweets.csv state || true
+          if git diff --cached --quiet; then
+            echo "No new images."
+            exit 0
+          fi
+          git commit -m "[scraper] sheet images ingested"
+          git pull --rebase origin main || true
+          git push origin HEAD:main
