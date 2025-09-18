@@ -15,3 +15,49 @@ families:
   BRACCO_FAM:   { detect_any: ["Betting Splits","Bracco","% Bets","% Handle"] }
   BOL_FAM:      { detect_any: ["BetOnline","BOL","Dave Mason","% Bets","% Handle"] }
   COVERS_FAM:   { detect_any: ["Covers","Covers.com","Consensus"] }
+# --- Circa Sports tweet grid ---
+- name: CIRCA_FAM
+  match:
+    any_text:
+      - "Circa Sports"
+      - "SPORTSBOOK Betting Splits"
+      - "Betting Splits Expanded Splits"
+  table:
+    find_headers:
+      - ["Money", "Spread", "Total"]
+      - ["Handle", "Bets"]
+    columns:
+      away_team:  ["team","away","matchup","visitor"]
+      home_team:  ["team","home"]
+      market:     ["market","type"]
+      tickets_pct:["bets","tickets","% bets","bets%"]
+      handle_pct: ["handle","% handle","handle%"]
+      line:       ["line","odds","price","spread","ml","total"]
+  normalize:
+    market_map:
+      ML:     ["money","moneyline","ml"]
+      Spread: ["spread","sp","rl"]
+      Total:  ["total","o/u","ou","tot"]
+
+# --- Bracco grid ---
+- name: BRACCO_FAM
+  match:
+    any_text:
+      - "BRACCO"
+      - "Betting Splits"
+  table:
+    find_headers:
+      - ["Money", "Spread", "Total"]
+      - ["Handle", "Bets"]
+    columns:
+      away_team:  ["team","away","matchup","visitor"]
+      home_team:  ["team","home"]
+      market:     ["market","type"]
+      tickets_pct:["bets","tickets","% bets","bets%"]
+      handle_pct: ["handle","% handle","handle%"]
+      line:       ["line","odds","price","spread","ml","total"]
+  normalize:
+    market_map:
+      ML:     ["money","moneyline","ml"]
+      Spread: ["spread","sp","rl"]
+      Total:  ["total","o/u","ou","tot"]
