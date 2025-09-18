@@ -61,3 +61,58 @@ families:
       ML:     ["money","moneyline","ml"]
       Spread: ["spread","sp","rl"]
       Total:  ["total","o/u","ou","tot"]
+  CIRCA_FAM:
+    match:
+      header_text:
+        - "Circa"
+        - "CIRCA"
+    normalize:
+      tickets_pct: ["bets", "% bets", "tickets", "bets%"]
+      handle_pct:  ["handle", "% handle", "handle%"]
+      line:        ["line", "odds", "price", "spread", "ml", "total"]
+    market_map:
+      "ML":     ["money", "moneyline", "ml"]
+      "Spread": ["spread", "sp", "rl"]
+      "Total":  ["total", "o/u", "ou", "tot"]
+
+  BRACCO_FAM:
+    match:
+      header_text:
+        - "BRACCO"
+        - "Bracco"
+    normalize:
+      tickets_pct: ["bets", "% bets", "tickets", "bets%"]
+      handle_pct:  ["handle", "% handle", "handle%"]
+      line:        ["line", "odds", "price", "spread", "ml", "total"]
+    market_map:
+      "ML":     ["money", "moneyline", "ml"]
+      "Spread": ["spread", "sp", "rl"]
+      "Total":  ["total", "o/u", "ou", "tot"]
+
+  FANDUEL_FAM:
+    match:
+      header_text:
+        - "FanDuel"
+        - "FANDUEL"
+    normalize:
+      tickets_pct: ["bets", "% bets", "tickets", "bets%"]
+      handle_pct:  ["handle", "% handle", "handle%"]
+      line:        ["line", "odds", "price", "spread", "ml", "total"]
+    market_map:
+      "ML":     ["money", "moneyline", "ml"]
+      "Spread": ["spread", "sp", "rl"]
+      "Total":  ["total", "o/u", "ou", "tot"]
+
+  XYZ_FAM:
+    match:
+      header_text:
+        - "Sportsbook"
+        - "Betting Splits"
+    normalize:
+      tickets_pct: ["bets", "% bets", "tickets", "bets%"]
+      handle_pct:  ["handle", "% handle", "handle%"]
+      line:        ["line", "odds", "price", "spread", "ml", "total"]
+    market_map:
+      "ML":     ["money", "moneyline", "ml"]
+      "Spread": ["spread", "sp", "rl"]
+      "Total":  ["total", "o/u", "ou", "tot"]
