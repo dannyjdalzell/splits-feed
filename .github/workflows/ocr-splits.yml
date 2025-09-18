@@ -87,7 +87,7 @@ jobs:
             git fetch origin main
             git checkout -B ocr-push origin/main
 
-            # Obtain remote CSV content (if present) from the fetched origin/main
+            # Obtain remote CSV content (if present)
             if git cat-file -e origin/main:splits.csv 2>/dev/null; then
               git show origin/main:splits.csv > /tmp/remote.csv
             else
@@ -115,13 +115,7 @@ jobs:
               exit 0
             fi
 
-            # Commit (idempotent message)
-            if git diff --cached --quiet --name-only --exit-code >/dev/null 2>&1; then
-              echo "No staged changes."
-              exit 0
-            else
-              git commit -m "OCR: append new split rows (merged, deduped)"
-            fi
+            git commit -m "OCR: append new split rows (merged, deduped)"
 
             # Try to push; if non-fast-forward, retry after a short backoff
             if git push origin ocr-push:main; then
