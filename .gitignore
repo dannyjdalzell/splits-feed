@@ -1,2 +1,12 @@
 .DS_Store
 audit/
+
+# --- allow CI outputs to be committed ---
+!audit_out/
+!audit_out/*.csv
+!audit_out/*.md
+
+!sources/
+!sources/sheets/
+!sources/sheets/twitter/
+!sources/sheets/twitter/tweets.csv
