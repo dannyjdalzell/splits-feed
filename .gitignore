@@ -19,3 +19,6 @@ audit/
 !sources/sheets/
 !sources/sheets/twitter/
 !sources/sheets/twitter/tweets.csv
+
+# local editor backups
+*.save
