@@ -1,0 +1,411 @@
+{
+  "Alabama Crimson Tide": [
+    "Alabama Crimson Tide",
+    "Alabama",
+    "Crimson Tide",
+    "Bama"
+  ],
+  "Auburn Tigers": [
+    "Auburn Tigers",
+    "Auburn",
+    "Tigers"
+  ],
+  "Arkansas Razorbacks": [
+    "Arkansas Razorbacks",
+    "Arkansas",
+    "Razorbacks",
+    "Hogs"
+  ],
+  "Arizona State Sun Devils": [
+    "Arizona State Sun Devils",
+    "Arizona State",
+    "ASU",
+    "Sun Devils"
+  ],
+  "Arizona Wildcats": [
+    "Arizona Wildcats",
+    "Arizona Wildcats",
+    "Arizona",
+    "Wildcats"
+  ],
+  "Baylor Bears": [
+    "Baylor Bears",
+    "Baylor",
+    "Bears"
+  ],
+  "Boise State Broncos": [
+    "Boise State Broncos",
+    "Boise State",
+    "Boise",
+    "Broncos"
+  ],
+  "Boston College Eagles": [
+    "Boston College Eagles",
+    "Boston College",
+    "BC",
+    "Eagles"
+  ],
+  "BYU Cougars": [
+    "BYU Cougars",
+    "BYU",
+    "Brigham Young",
+    "Cougars"
+  ],
+  "Cal Golden Bears": [
+    "California Golden Bears",
+    "Cal Golden Bears",
+    "Cal",
+    "California",
+    "Golden Bears"
+  ],
+  "Clemson Tigers": [
+    "Clemson Tigers",
+    "Clemson",
+    "Tigers"
+  ],
+  "Colorado Buffaloes": [
+    "Colorado Buffaloes",
+    "Colorado",
+    "Buffaloes",
+    "Buffs"
+  ],
+  "Duke Blue Devils": [
+    "Duke Blue Devils",
+    "Duke",
+    "Blue Devils"
+  ],
+  "Florida Gators": [
+    "Florida Gators",
+    "Florida",
+    "Gators",
+    "UF"
+  ],
+  "Florida State Seminoles": [
+    "Florida State Seminoles",
+    "Florida State",
+    "FSU",
+    "Seminoles",
+    "Noles"
+  ],
+  "Georgia Bulldogs": [
+    "Georgia Bulldogs",
+    "Georgia",
+    "Bulldogs",
+    "UGA"
+  ],
+  "Georgia Tech Yellow Jackets": [
+    "Georgia Tech Yellow Jackets",
+    "Georgia Tech",
+    "GT",
+    "Yellow Jackets"
+  ],
+  "Houston Cougars": [
+    "Houston Cougars",
+    "Houston Cougars",
+    "Houston",
+    "Cougars",
+    "UH"
+  ],
+  "Illinois Fighting Illini": [
+    "Illinois Fighting Illini",
+    "Illinois",
+    "Illini"
+  ],
+  "Indiana Hoosiers": [
+    "Indiana Hoosiers",
+    "Indiana",
+    "Hoosiers"
+  ],
+  "Iowa Hawkeyes": [
+    "Iowa Hawkeyes",
+    "Iowa",
+    "Hawkeyes"
+  ],
+  "Iowa State Cyclones": [
+    "Iowa State Cyclones",
+    "Iowa State",
+    "ISU",
+    "Cyclones"
+  ],
+  "Kansas Jayhawks": [
+    "Kansas Jayhawks",
+    "Kansas",
+    "Jayhawks",
+    "KU"
+  ],
+  "Kansas State Wildcats": [
+    "Kansas State Wildcats",
+    "Kansas State",
+    "K State",
+    "Wildcats",
+    "KSU"
+  ],
+  "Kentucky Wildcats": [
+    "Kentucky Wildcats",
+    "Kentucky",
+    "Wildcats",
+    "UK"
+  ],
+  "Louisville Cardinals": [
+    "Louisville Cardinals",
+    "Louisville",
+    "Cardinals",
+    "UofL"
+  ],
+  "LSU Tigers": [
+    "LSU Tigers",
+    "LSU",
+    "Louisiana State",
+    "Tigers"
+  ],
+  "Miami Hurricanes": [
+    "Miami Hurricanes",
+    "Miami Hurricanes",
+    "Miami",
+    "Hurricanes",
+    "The U",
+    "UM"
+  ],
+  "Michigan State Spartans": [
+    "Michigan State Spartans",
+    "Michigan State",
+    "MSU",
+    "Spartans"
+  ],
+  "Michigan Wolverines": [
+    "Michigan Wolverines",
+    "Michigan",
+    "Wolverines",
+    "UM"
+  ],
+  "Minnesota Golden Gophers": [
+    "Minnesota Golden Gophers",
+    "Minnesota",
+    "Golden Gophers",
+    "Gophers"
+  ],
+  "Mississippi State Bulldogs": [
+    "Mississippi State Bulldogs",
+    "Mississippi State",
+    "MSU",
+    "Bulldogs"
+  ],
+  "Ole Miss Rebels": [
+    "Ole Miss Rebels",
+    "Ole Miss",
+    "Mississippi",
+    "Rebels",
+    "UM"
+  ],
+  "Missouri Tigers": [
+    "Missouri Tigers",
+    "Missouri",
+    "Mizzou",
+    "Tigers"
+  ],
+  "Nebraska Cornhuskers": [
+    "Nebraska Cornhuskers",
+    "Nebraska",
+    "Cornhuskers",
+    "Huskers",
+    "NU"
+  ],
+  "North Carolina Tar Heels": [
+    "North Carolina Tar Heels",
+    "North Carolina",
+    "UNC",
+    "Tar Heels"
+  ],
+  "NC State Wolfpack": [
+    "NC State Wolfpack",
+    "NC State",
+    "NCSU",
+    "Wolfpack"
+  ],
+  "Notre Dame Fighting Irish": [
+    "Notre Dame Fighting Irish",
+    "Notre Dame",
+    "Fighting Irish",
+    "ND"
+  ],
+  "Ohio State Buckeyes": [
+    "Ohio State Buckeyes",
+    "Ohio State",
+    "OSU",
+    "Buckeyes"
+  ],
+  "Oklahoma Sooners": [
+    "Oklahoma Sooners",
+    "Oklahoma",
+    "OU",
+    "Sooners"
+  ],
+  "Oklahoma State Cowboys": [
+    "Oklahoma State Cowboys",
+    "Oklahoma State",
+    "OSU",
+    "Cowboys"
+  ],
+  "Oregon Ducks": [
+    "Oregon Ducks",
+    "Oregon",
+    "Ducks",
+    "UO"
+  ],
+  "Oregon State Beavers": [
+    "Oregon State Beavers",
+    "Oregon State",
+    "OSU",
+    "Beavers"
+  ],
+  "Penn State Nittany Lions": [
+    "Penn State Nittany Lions",
+    "Penn State",
+    "PSU",
+    "Nittany Lions"
+  ],
+  "Pittsburgh Panthers": [
+    "Pittsburgh Panthers",
+    "Pitt",
+    "Pittsburgh",
+    "Panthers"
+  ],
+  "Purdue Boilermakers": [
+    "Purdue Boilermakers",
+    "Purdue",
+    "Boilermakers"
+  ],
+  "Rutgers Scarlet Knights": [
+    "Rutgers Scarlet Knights",
+    "Rutgers",
+    "Scarlet Knights"
+  ],
+  "South Carolina Gamecocks": [
+    "South Carolina Gamecocks",
+    "South Carolina",
+    "Gamecocks",
+    "USCjr"
+  ],
+  "Stanford Cardinal": [
+    "Stanford Cardinal",
+    "Stanford",
+    "Cardinal"
+  ],
+  "Syracuse Orange": [
+    "Syracuse Orange",
+    "Syracuse",
+    "Orange"
+  ],
+  "TCU Horned Frogs": [
+    "TCU Horned Frogs",
+    "TCU",
+    "Texas Christian",
+    "Horned Frogs"
+  ],
+  "Tennessee Volunteers": [
+    "Tennessee Volunteers",
+    "Tennessee",
+    "Volunteers",
+    "Vols",
+    "UT"
+  ],
+  "Texas A&M Aggies": [
+    "Texas A&M Aggies",
+    "Texas A&M",
+    "A&M",
+    "Aggies",
+    "TAMU"
+  ],
+  "Texas Longhorns": [
+    "Texas Longhorns",
+    "Texas",
+    "Longhorns",
+    "UT"
+  ],
+  "Texas Tech Red Raiders": [
+    "Texas Tech Red Raiders",
+    "Texas Tech",
+    "Tech",
+    "Red Raiders"
+  ],
+  "UCLA Bruins": [
+    "UCLA Bruins",
+    "UCLA",
+    "Bruins"
+  ],
+  "USC Trojans": [
+    "USC Trojans",
+    "USC",
+    "Southern Cal",
+    "Trojans"
+  ],
+  "Utah Utes": [
+    "Utah Utes",
+    "Utah",
+    "Utes"
+  ],
+  "Virginia Cavaliers": [
+    "Virginia Cavaliers",
+    "Virginia",
+    "UVA",
+    "Cavaliers"
+  ],
+  "Virginia Tech Hokies": [
+    "Virginia Tech Hokies",
+    "Virginia Tech",
+    "VT",
+    "Hokies"
+  ],
+  "Wake Forest Demon Deacons": [
+    "Wake Forest Demon Deacons",
+    "Wake Forest",
+    "WF",
+    "Demon Deacons"
+  ],
+  "Washington Huskies": [
+    "Washington Huskies",
+    "Washington",
+    "UW",
+    "Huskies"
+  ],
+  "Washington State Cougars": [
+    "Washington State Cougars",
+    "Washington State",
+    "WSU",
+    "Cougars"
+  ],
+  "West Virginia Mountaineers": [
+    "West Virginia Mountaineers",
+    "West Virginia",
+    "WVU",
+    "Mountaineers"
+  ],
+  "Wisconsin Badgers": [
+    "Wisconsin Badgers",
+    "Wisconsin",
+    "Badgers",
+    "UW"
+  ],
+  "Central Michigan Chippewas": [
+    "Central Michigan Chippewas",
+    "Central Michigan",
+    "CMU",
+    "Chippewas"
+  ],
+  "Temple Owls": [
+    "Temple Owls",
+    "Temple",
+    "Owls"
+  ],
+  "Georgia State Panthers": [
+    "Georgia State Panthers",
+    "Georgia State",
+    "GSU",
+    "Panthers"
+  ],
+  "UC Davis Aggies": [
+    "UC Davis Aggies",
+    "UC Davis",
+    "Aggies"
+  ]
+}
