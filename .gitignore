@@ -22,3 +22,6 @@ audit/
 
 # local editor backups
 *.save
+
+# pipeline diagnostics
+/audit_out/unresolved_*.txt
