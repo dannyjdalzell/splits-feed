@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  build-fuel:
+  pipeline:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,9 +34,6 @@ jobs:
         env:
           SHEETS_CSV_URL: ${{ secrets.SHEETS_CSV_URL }}
         run: |
-          if [ -z "$SHEETS_CSV_URL" ]; then
-            echo "SHEETS_CSV_URL missing"; exit 1
-          fi
           curl -fsSL "$SHEETS_CSV_URL" -o ./sources/sheets/twitter/tweets.csv
           wc -l ./sources/sheets/twitter/tweets.csv || true
 
@@ -47,16 +44,38 @@ jobs:
             --dict ./dictionaries \
             --out  ./audit_out/twitter_text_signals.csv
 
-      - name: Normalize & Merge (apply twitter weights to matchups)
+      - name: Normalize & Merge (build staged)
         run: |
           python scripts/normalize_and_merge.py
+          test -f ./audit_out/splits_staged.csv && wc -l ./audit_out/splits_staged.csv || true
+
+      - name: Promote staged → splits.csv
+        run: |
+          python - <<'PY'
+          import pandas as pd, os, sys
+          STAGED = "audit_out/splits_staged.csv"
+          if not os.path.exists(STAGED) or os.path.getsize(STAGED)==0:
+              print("no staged file; bail"); sys.exit(0)
+          df = pd.read_csv(STAGED, dtype=str).fillna("")
+          if len(df)==0:
+              print("staged empty; bail"); sys.exit(0)
+          req = {"league","home_team","away_team"}
+          if not req.issubset(df.columns):
+              print("missing required cols; bail"); sys.exit(0)
+          if "league" in df.columns:
+              df = df[df["league"].astype(str)!="MIXED"]
+          if len(df)==0:
+              print("only MIXED rows; bail"); sys.exit(0)
+          df.to_csv("splits.csv", index=False)
+          print("PROMOTE_OK rows:", len(df))
+          PY
 
       - name: Commit outputs
         run: |
-          git config user.name "github-actions"
+          git config user.name  "splits-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add ./sources/sheets/twitter/tweets.csv \
-                  ./audit_out/twitter_text_signals.csv \
-                  ./audit_out/boardroom_inputs.csv
-          git commit -m "ci: refresh feeds (tweets+boardroom_inputs) [auto]" || echo "no changes"
+          git add sources/sheets/twitter/tweets.csv || true
+          git add audit_out/twitter_text_signals.csv audit_out/boardroom_inputs.csv || true
+          git add splits.csv || true
+          git commit -m "ci: refresh + promote (tweets, staged → splits.csv)" || echo "no changes"
           git push
