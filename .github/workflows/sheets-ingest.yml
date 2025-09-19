@@ -1,4 +1,4 @@
-name: Sheets → Twitter ingest (every 15m, hands-off)
+name: Sheets → Twitter ingest (every 15m)
 
 on:
   schedule:
@@ -33,11 +33,9 @@ jobs:
         run: |
           test -n "$SHEETS_CSV_URL" || { echo "SHEETS_CSV_URL secret missing"; exit 1; }
           mkdir -p ./sources/sheets/twitter
-          # cache-buster so Google doesn't hand us a stale copy
-          curl -fsSL "$SHEETS_CSV_URL&no_cache=$(date +%s)" -o ./sources/sheets/twitter/tweets.csv
+          curl -fsSL "$SHEETS_CSV_URL&nocache=$(date +%s)" -o ./sources/sheets/twitter/tweets.csv
           test -s ./sources/sheets/twitter/tweets.csv || { echo "empty tweets.csv"; exit 1; }
-          echo "tweets.csv lines:" $(wc -l < ./sources/sheets/twitter/tweets.csv)
-          head -2 ./sources/sheets/twitter/tweets.csv || true
+          echo "tweets.csv lines: $(wc -l < ./sources/sheets/twitter/tweets.csv)"
 
       - name: Run Twitter ingest
         run: |
@@ -46,21 +44,10 @@ jobs:
             --dict ./dictionaries \
             --out  ./audit_out/twitter_resolved.csv
 
-      - name: Quick debug (columns/first rows)
-        run: |
-          python - <<'PY'
-          import pandas as pd
-          df=pd.read_csv('audit_out/twitter_resolved.csv')
-          print("twitter_resolved rows:", len(df))
-          print("cols:", list(df.columns))
-          print(df.head(3).to_string())
-          PY
-
       - name: Commit updates
         run: |
           git config user.name  "splits-bot"
           git config user.email "actions@users.noreply.github.com"
-          # force-add in case .gitignore still blocks
           git add -f audit_out/twitter_resolved.csv sources/sheets/twitter/tweets.csv || true
           if git diff --cached --quiet; then
             echo "No changes to commit."
