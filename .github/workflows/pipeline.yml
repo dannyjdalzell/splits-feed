@@ -1,0 +1,62 @@
+name: pipeline
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build-fuel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+
+      - name: Ensure dirs
+        run: |
+          mkdir -p ./sources/sheets/twitter
+          mkdir -p ./audit_out
+
+      - name: Fetch Google Sheet (tweets.csv)
+        env:
+          SHEETS_CSV_URL: ${{ secrets.SHEETS_CSV_URL }}
+        run: |
+          if [ -z "$SHEETS_CSV_URL" ]; then
+            echo "SHEETS_CSV_URL missing"; exit 1
+          fi
+          curl -fsSL "$SHEETS_CSV_URL" -o ./sources/sheets/twitter/tweets.csv
+          wc -l ./sources/sheets/twitter/tweets.csv || true
+
+      - name: Analyze Twitter text (graded)
+        run: |
+          python scripts/analyze_twitter_text.py \
+            --csv  ./sources/sheets/twitter/tweets.csv \
+            --dict ./dictionaries \
+            --out  ./audit_out/twitter_text_signals.csv
+
+      - name: Normalize & Merge (apply twitter weights to matchups)
+        run: |
+          python scripts/normalize_and_merge.py
+
+      - name: Commit outputs
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add ./sources/sheets/twitter/tweets.csv \
+                  ./audit_out/twitter_text_signals.csv \
+                  ./audit_out/boardroom_inputs.csv
+          git commit -m "ci: refresh feeds (tweets+boardroom_inputs) [auto]" || echo "no changes"
+          git push
