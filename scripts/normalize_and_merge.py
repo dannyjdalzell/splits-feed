@@ -1,173 +1,177 @@
-# normalize_and_merge.py
-# Merge resolver output (images) + optional opponent_fills + Twitter text into a
-# single staged CSV in the splits schema. Drops MIXED, enforces away=top, home=bottom.
+#!/usr/bin/env python3
+"""
+normalize_and_merge.py
+Unifies pipeline fuels and emits a boardroom-ready CSV with Twitter text weights applied to each matchup.
 
-import argparse, os
+Inputs (all optional except splits.csv):
+  - ./splits.csv                                   # base matchup rows (home_team, away_team, market, etc.)
+  - ./audit_out/twitter_text_signals.csv           # graded LOW/MED/HIGH text signals (no league clustering)
+  - ./dictionaries/*.json                          # team dictionaries to canonicalize names
+
+Output:
+  - ./audit_out/boardroom_inputs.csv               # enriched matchups with twitter weights (home/away), totals
+
+Weighting:
+  HIGH = 2,  MED = 1,  LOW = 0
+  We aggregate per team across the file; if a 'date' column exists we favor recent (today +/- 2 days).
+
+Usage:
+  python scripts/normalize_and_merge.py
+"""
+
+import os, re, json, math, sys
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 
-SPLITS_COLS = [
-    'timestamp','league','sport','event_date','event_time','source',
-    'home_team','away_team','market','side','odds','line','line_num','total','total_num',
-    'bets_pct','bets_pct_num','handle_pct','handle_pct_num','ticket#','$ bet',
-    'image_id','filename','notes'
-]
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-def read_csv_safe(path):
-    if not path or not os.path.exists(path): return None
+# ---------- helpers ----------
+def read_csv(path, required=False):
+    if not os.path.exists(path):
+        if required:
+            raise SystemExit(f"[ERR] missing required file: {path}")
+        return pd.DataFrame()
     try:
-        return pd.read_csv(path)
-    except Exception:
-        return None
+        return pd.read_csv(path, dtype=str, keep_default_na=False).fillna("")
+    except Exception as e:
+        if required:
+            raise
+        print(f"[WARN] failed to read {path}: {e}")
+        return pd.DataFrame()
 
-def to_splits_from_resolver(df, label):
-    # Accept v2 columns if present (away/home explicit), else fall back to team1/team2 = away/home
-    if df is None or len(df) == 0:
-        return pd.DataFrame(columns=SPLITS_COLS), 0
-    df = df.copy()
+def load_dictionaries(droot):
+    alias_to_team = {}
+    team_to_canon = {}
+    files = ["nfl.json","mlb.json","nba.json","nhl.json","ncaaf_fbs_seed.json"]
+    for f in files:
+        p = os.path.join(droot, f)
+        if not os.path.isfile(p): 
+            continue
+        data = json.load(open(p, "r"))
+        for canonical, aliases in data.items():
+            team_to_canon[canonical.upper()] = canonical
+            parts = canonical.split()
+            seeds = [canonical]
+            if len(parts) >= 2:
+                seeds.append(" ".join(parts[:-1]))   # city
+                seeds.append(parts[-1])              # nickname
+            for a in list(set(seeds + list(aliases))):
+                alias_to_team[a.strip().upper()] = canonical
+    # pragmatic common shorthands (bias to common betting references)
+    extras = {
+        "DAL": "Dallas Cowboys", "BUF": "Buffalo Bills", "KC": "Kansas City Chiefs",
+        "TB": "Tampa Bay Buccaneers", "RAYS": "Tampa Bay Rays",
+        "LIGHTNING": "Tampa Bay Lightning", "RANGERS": "Texas Rangers",
+        "KINGS": "Los Angeles Kings", "LAKERS": "Los Angeles Lakers",
+        "CLIPPERS": "LA Clippers", "RAMS": "Los Angeles Rams",
+        "CHARGERS": "Los Angeles Chargers", "SEAHAWKS": "Seattle Seahawks",
+        "MARINERS": "Seattle Mariners", "WARRIORS": "Golden State Warriors",
+        "ORIOLES": "Baltimore Orioles", "ASTROS": "Houston Astros",
+        "PIRATES": "Pittsburgh Pirates",
+    }
+    for a,t in extras.items():
+        alias_to_team[a] = t
+    return alias_to_team, team_to_canon
 
-    # Pair league (drop MIXED)
-    if 'pair_league' in df.columns:
-        df = df[df['pair_league'] != 'MIXED']
+def to_canonical(name, alias_map, canon_map):
+    s = (name or "").strip()
+    if not s:
+        return ""
+    u = s.upper()
+    if u in canon_map:
+        return canon_map[u]
+    # try full-phrase alias, then token scan (longest alias first would require precomputed list)
+    if u in alias_map:
+        return alias_map[u]
+    # last-resort: collapse whitespace
+    u2 = re.sub(r"\s+", " ", u)
+    return alias_map.get(u2, s)
 
-    # Determine away/home
-    if {'away_team','home_team'}.issubset(df.columns):
-        away = df['away_team']
-        home = df['home_team']
+def parse_date(s):
+    if not s: return None
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%m/%d/%Y", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return datetime.strptime(s, fmt)
+        except Exception:
+            continue
+    return None
+
+# ---------- load inputs ----------
+splits_path = os.path.join(ROOT, "splits.csv")
+tweets_path = os.path.join(ROOT, "audit_out", "twitter_text_signals.csv")
+dict_dir    = os.path.join(ROOT, "dictionaries")
+
+splits = read_csv(splits_path, required=True)
+tweets = read_csv(tweets_path, required=False)
+alias_map, canon_map = load_dictionaries(dict_dir)
+
+# ---------- canonicalize split teams ----------
+for col in ["home_team","away_team"]:
+    if col in splits.columns:
+        splits[col] = splits[col].apply(lambda x: to_canonical(x, alias_map, canon_map))
     else:
-        away = df.get('team1', '')
-        home = df.get('team2', '')
+        splits[col] = ""
 
-    out = pd.DataFrame(columns=SPLITS_COLS)
-    out['timestamp']   = ''                         # unknown from screenshots
-    out['league']      = df.get('pair_league', df.get('league',''))
-    out['sport']       = out['league']
-    out['event_date']  = ''
-    out['event_time']  = ''
-    out['source']      = label                      # e.g., RESOLVER_V2
-    out['home_team']   = home
-    out['away_team']   = away
-    out['market']      = 'UNKNOWN'
-    out['side']        = ''
-    out['odds']        = ''
-    out['line']        = ''
-    out['line_num']    = ''
-    out['total']       = ''
-    out['total_num']   = ''
-    out['bets_pct']    = ''
-    out['bets_pct_num']= ''
-    out['handle_pct']  = ''
-    out['handle_pct_num']=''
-    out['ticket#']     = ''
-    out['$ bet']       = ''
-    out['image_id']    = df.get('image_id','')
-    out['filename']    = df.get('filename_base','')
-    out['notes']       = label
-    return out, len(out)
+# ---------- build twitter team weights ----------
+# Map signal strength to weight
+W = {"HIGH": 2, "MED": 1, "LOW": 0}
 
-def to_splits_from_twitter(df):
-    # Twitter text has no visual ordering; keep teams, mark note.
-    if df is None or len(df) == 0:
-        return pd.DataFrame(columns=SPLITS_COLS), 0
-    df = df.copy()
+team_weight = {}
 
-    out = pd.DataFrame(columns=SPLITS_COLS)
-    out['timestamp']   = df.get('timestamp','')
-    out['league']      = df.get('league','')
-    out['sport']       = df.get('sport', out['league'])
-    out['event_date']  = ''
-    out['event_time']  = ''
-    out['source']      = 'TWITTER'
-    # Keep order as-is; downstream can decide home/away when schedule context exists
-    out['home_team']   = df.get('team2','')   # optional convention
-    out['away_team']   = df.get('team1','')
-    out['market']      = 'UNKNOWN'
-    out['side']        = ''
-    out['odds']        = ''
-    out['line']        = ''
-    out['line_num']    = ''
-    out['total']       = ''
-    out['total_num']   = ''
-    out['bets_pct']    = ''
-    out['bets_pct_num']= ''
-    out['handle_pct']  = ''
-    out['handle_pct_num']=''
-    out['ticket#']     = ''
-    out['$ bet']       = ''
-    out['image_id']    = df.get('image_id','')
-    out['filename']    = df.get('image_url','')
-    out['notes']       = 'TWITTER_TEXT'
-    # strict: only keep same-league tweets (ingest script already does that)
-    good = out[out['league'].astype(str).str.len() > 0].copy()
-    return good, len(good)
+if not tweets.empty:
+    # Optional date decay: keep today±2 days full weight, otherwise half weight
+    today = datetime.now(timezone.utc).date()
+    def recent_factor(ds):
+        d = parse_date(ds)
+        if not d: 
+            return 1.0
+        dd = abs((d.date() - today).days)
+        return 1.0 if dd <= 2 else 0.5
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument('--resolver', required=False, help='resolved_games_final_v2.csv')
-    ap.add_argument('--opponent_fills', required=False, help='opponent_filled.csv (optional)')
-    ap.add_argument('--twitter', required=False, help='twitter_resolved.csv (optional)')
-    ap.add_argument('--stage', required=True, help='output staged CSV path')
-    ap.add_argument('--report', required=True, help='output QA markdown')
-    args = ap.parse_args()
+    for _, r in tweets.iterrows():
+        txt = r.get("text","")
+        teams_field = r.get("teams","")
+        strength = r.get("signal_strength","").upper()
+        base = W.get(strength, 0)
 
-    resolver = read_csv_safe(os.path.expanduser(args.resolver)) if args.resolver else None
-    fills    = read_csv_safe(os.path.expanduser(args.opponent_fills)) if args.opponent_fills else None
-    twitter  = read_csv_safe(os.path.expanduser(args.twitter)) if args.twitter else None
+        if not teams_field: 
+            continue
+        # teams are " | "-separated canonical names from analyzer (we still pass through to_canonical defensively)
+        teams = [t.strip() for t in teams_field.split("|") if t.strip()]
+        if not teams: 
+            continue
 
-    # Build resolver table
-    res_tbl, n_res = to_splits_from_resolver(resolver, 'RESOLVER_V2')
-    # Promote high-confidence fills (if already merged upstream, this will be small/no-op)
-    if fills is not None and len(fills):
-        same_lg = fills[(fills['known_league'] == fills['opponent_league']) & (fills['confidence_pct'] >= 80.0)].copy()
-        if len(same_lg):
-            same_lg.rename(columns={'known_team':'team1','inferred_opponent':'team2','known_league':'pair_league',
-                                    'filename_base':'filename_base','image_id':'image_id'}, inplace=True)
-            filled_tbl, n_filled = to_splits_from_resolver(same_lg, 'OPPONENT_FILL')
-            res_tbl = pd.concat([res_tbl, filled_tbl], ignore_index=True)
+        factor = recent_factor(r.get("date",""))
+        weight = base * factor
 
-    tw_tbl, n_tw = to_splits_from_twitter(twitter)
+        for t in teams:
+            canon = to_canonical(t, alias_map, canon_map)
+            team_weight[canon] = team_weight.get(canon, 0.0) + weight
 
-    # Combine & dedupe
-    stage = pd.concat([res_tbl, tw_tbl], ignore_index=True)
+# ---------- apply weights to matchups ----------
+# We leave all original split columns intact, and add:
+#  - twitter_weight_home
+#  - twitter_weight_away
+#  - twitter_weight_total
+out = splits.copy()
 
-    # Simple dedupe key: league + home + away + filename (if present)
-    def key(r):
-        return '|'.join([
-            str(r.get('league','')).lower(),
-            str(r.get('home_team','')).lower(),
-            str(r.get('away_team','')).lower(),
-            str(r.get('filename','')).lower(),
-            str(r.get('image_id','')).lower()
-        ])
-    if len(stage):
-        stage['_k'] = stage.apply(key, axis=1)
-        before = len(stage)
-        stage = stage.drop_duplicates(subset=['_k']).drop(columns=['_k'])
-        after = len(stage)
-    else:
-        before = after = 0
+def w_of(team):
+    return float(team_weight.get(team, 0.0))
 
-    # Write staged file
-    os.makedirs(os.path.dirname(os.path.expanduser(args.stage)), exist_ok=True)
-    stage.to_csv(os.path.expanduser(args.stage), index=False)
+out["twitter_weight_home"]  = out["home_team"].apply(w_of)
+out["twitter_weight_away"]  = out["away_team"].apply(w_of)
+out["twitter_weight_total"] = out["twitter_weight_home"] + out["twitter_weight_away"]
 
-    # QA report
-    lines = []
-    lines.append("# splits staged QA")
-    lines.append(f"- resolver rows: {n_res}")
-    lines.append(f"- twitter rows:  {n_tw}")
-    lines.append(f"- staged rows:   {after} (deduped from {before})")
-    if len(stage):
-        by_lg = stage['league'].value_counts(dropna=False).to_dict()
-        by_src = stage['source'].value_counts(dropna=False).to_dict()
-        lines.append(f"- by league: {by_lg}")
-        lines.append(f"- by source: {by_src}")
-    os.makedirs(os.path.dirname(os.path.expanduser(args.report)), exist_ok=True)
-    with open(os.path.expanduser(args.report), 'w') as f:
-        f.write('\n'.join(lines) + '\n')
+# ---------- write output ----------
+os.makedirs(os.path.join(ROOT, "audit_out"), exist_ok=True)
+out_path = os.path.join(ROOT, "audit_out", "boardroom_inputs.csv")
+out.to_csv(out_path, index=False)
 
-    print("Wrote:", os.path.expanduser(args.stage))
-    print("QA:", os.path.expanduser(args.report))
-    print(f"Rows staged: {after}")
-
-if __name__ == '__main__':
-    main()
+# ---------- log ----------
+print(f"[ok] splits rows: {len(splits)}  twitter rows: {len(tweets)}  teams with weight: {len(team_weight)}")
+print(f"[ok] wrote: {out_path}")
+top_sig = sorted(team_weight.items(), key=lambda kv: kv[1], reverse=True)[:10]
+if top_sig:
+    print("[top twitter-weighted teams]")
+    for t,v in top_sig:
+        print(f"  {t:30s}  {v:.2f}")
