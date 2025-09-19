@@ -1,0 +1,6 @@
+timestamp,league,sport,event_date,event_time,source,home_team,away_team,market,side,odds,line,line_num,total,total_num,bets_pct,bets_pct_num,handle_pct,handle_pct_num,ticket#,$ bet,image_id,filename,notes,_k,filename_base
+2025-09-17T21:15:48+00:00,NFL,,,,TW_OTHER_FAM,Las Vegas Raiders,rs Los Angeles Chargers,SPREAD,,,5.0,5.0,,,35.0,35.0,3.0,3.0,,,nan,,,id::nan,nan
+,,,,,,RA AY TAMPA BAY,LAS VEGAS RAIDERS 43,SPREAD,HOME,-1170.0,53.0,53.0,,,53.0,53.0,60.0,60.0,,,c73a250ce62d8eb2,GOOD IMAGES FOR V12/IMG_9441 2.PNG,candidate,id::c73a250ce62d8eb2,IMG_9441 2.PNG
+,,,,,,Tampa Bay Buccaneers,Houston Texans,SPREAD,HOME,-1950.0,4.0,4.0,,,40.0,40.0,46.0,46.0,,,7d7d3cf1a85bb5ca,GOOD IMAGES FOR V12/IMG_9447 2.jpeg,candidate,id::7d7d3cf1a85bb5ca,IMG_9447 2.jpeg
+,,,,,,Los Angeles Chargers,Las Vegas Raiders,SPREAD,HOME,,35.0,35.0,,,53.0,53.0,52.0,52.0,,,11ad535f34140c05,GOOD IMAGES FOR V12/IMG_9450 2.jpeg,candidate,id::11ad535f34140c05,IMG_9450 2.jpeg
+,,,,,,Tennessee Titans,Miami Dolphins,TOTAL,OVER,20000.0,,,28.0,28.0,83.0,83.0,87.0,87.0,,,3bac44e201c59669,GOOD IMAGES FOR V12/IMG_9454 2.PNG,,id::3bac44e201c59669,IMG_9454 2.PNG
