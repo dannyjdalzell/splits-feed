@@ -8,6 +8,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: normalize-merge
+  cancel-in-progress: true
+
 jobs:
   stage:
     runs-on: ubuntu-latest
@@ -31,7 +35,7 @@ jobs:
         run: |
           git config user.name  "splits-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add audit_out/splits_staged.csv audit_out/qa_report.md || true
+          git add -f audit_out/splits_staged.csv audit_out/qa_report.md || true
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
