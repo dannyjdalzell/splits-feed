@@ -10,3 +10,12 @@ audit/
 !sources/sheets/
 !sources/sheets/twitter/
 !sources/sheets/twitter/tweets.csv
+
+# allow CI artifacts
+!audit_out/
+!audit_out/*.csv
+!audit_out/*.md
+!sources/
+!sources/sheets/
+!sources/sheets/twitter/
+!sources/sheets/twitter/tweets.csv
