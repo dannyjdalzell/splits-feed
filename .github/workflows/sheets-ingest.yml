@@ -1,12 +1,16 @@
-name: Sheets → Twitter ingest (every 15m)
+name: Sheets → Twitter ingest (every 15m, hands-off)
 
 on:
   schedule:
     - cron: "*/15 * * * *"   # every 15 minutes (UTC)
-  workflow_dispatch: {}
+  workflow_dispatch: {}       # allows manual run if you want
 
 permissions:
   contents: write
+
+concurrency:
+  group: sheets-ingest
+  cancel-in-progress: true
 
 jobs:
   ingest:
