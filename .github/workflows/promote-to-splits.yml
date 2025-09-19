@@ -1,0 +1,55 @@
+name: Promote staged → splits.csv (every 15m)
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-splits
+  cancel-in-progress: true
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          python - <<'PY'
+          import pandas as pd, os, sys
+          STAGED = "audit_out/splits_staged.csv"
+          if not os.path.exists(STAGED) or os.path.getsize(STAGED)==0:
+              print("no staged file; bail"); sys.exit(0)
+          df = pd.read_csv(STAGED, dtype=str).fillna("")
+          if len(df)==0:
+              print("staged empty; bail"); sys.exit(0)
+          # basic sanity: must have away/home/team columns
+          req = {"league","home_team","away_team"}
+          if not req.issubset(df.columns):
+              print("missing required cols; bail"); sys.exit(0)
+          # drop MIXED just in case
+          if "league" in df.columns:
+              df = df[df["league"].astype(str) != "MIXED"]
+          if len(df)==0:
+              print("only MIXED rows; bail"); sys.exit(0)
+          # write to splits.csv
+          df.to_csv("splits.csv", index=False)
+          print("PROMOTE_OK rows:", len(df))
+          PY
+      - name: Commit promotion (if changed)
+        run: |
+          if git diff --quiet -- splits.csv; then
+            echo "No changes to promote."
+          else
+            git config user.name  "splits-bot"
+            git config user.email "actions@users.noreply.github.com"
+            git add splits.csv
+            git commit -m "ci: promote staged → splits.csv [skip ci]"
+            git push
+          fi
