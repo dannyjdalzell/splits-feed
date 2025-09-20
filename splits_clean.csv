@@ -1,2 +1,10 @@
-timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source
-2025-09-20T16:36:07+00:00,NFL,rs Los Angeles Chargers,Las Vegas Raiders,Spread,35.0,3.0,5.0,TW_OTHER_FAM
+image_filename,image_sha256,image_bytes,image_mtime_utc,source,league,event_date,teams,market,side,handle_pct,bets_pct,odds,total_value,ticket_count,notes
+,,,,CIRCA_FAM,MLB,,,Spread,,59,,,,,
+,,,,TW_OTHER_FAM,NFL,,,Spread,,3,,,,,
+,,,,TW_OTHER_FAM,MLB,,,Spread,,41,,,,,
+,,,,CIRCA_FAM,MLB,,,ML,,30,,,,,
+,,,,CIRCA_FAM,Unknown,,,Spread,,46,,,,,
+,,,,TW_OTHER_FAM,Unknown,,,Spread,,37,,,,,
+,,,,TW_OTHER_FAM,Unknown,,,Spread,,82,,,,,
+,,,,CIRCA_FAM,MLB,,,Spread,,65,,,,,
+,,,,CIRCA_FAM,MLB,,,Spread,,54,,,,,
