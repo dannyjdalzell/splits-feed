@@ -120,3 +120,30 @@ jobs:
           j=json.load(urllib.request.urlopen(url))
           print("Public GET files:", ", ".join(sorted(j["files"].keys())))
           PY
+
+# Peek how many clean rows we have in splits.csv
+- name: Peek clean splits rows
+  id: peek
+  shell: bash
+  run: |
+    rows=$( (test -f splits.csv && tail -n +2 splits.csv | wc -l) || echo 0 )
+    echo "rows=$rows" >> "$GITHUB_OUTPUT"
+
+# Render with splits + twitter when we have enough clean rows
+- name: Render Boardroom (splits + twitter)
+  if: ${{ steps.peek.outputs.rows && fromJSON(steps.peek.outputs.rows) >= 25 }}
+  run: |
+    python scripts/boardroom_render.py \
+      --picks_csv boardroom/boardroom_picks.csv \
+      --signals   audit_out/twitter_text_signals.csv \
+      --splits    splits.csv \
+      --hours     72 --min_signals 2 --star5 6.0 --star4 3.5
+
+# Safe fallback: twitter-only render when splits are thin/junky
+- name: Render Boardroom (twitter-only fallback)
+  if: ${{ !steps.peek.outputs.rows || fromJSON(steps.peek.outputs.rows) < 25 }}
+  run: |
+    python scripts/boardroom_render.py \
+      --picks_csv boardroom/boardroom_picks.csv \
+      --signals   audit_out/twitter_text_signals.csv \
+      --hours     72 --min_signals 2 --star5 6.0 --star4 3.5
