@@ -1,4 +1,5 @@
 name: Publish Boardroom artifacts to Gist
+
 on:
   workflow_dispatch:
   schedule:
@@ -7,43 +8,49 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions: { contents: read }
+    permissions:
+      contents: read
     env:
-      GIST_ID: "<YOUR_GIST_ID_HERE>"
+      GIST_ID: "<PASTE_YOUR_GIST_ID>"
       GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+
     steps:
       - uses: actions/checkout@v3
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
 
-      - name: Ensure files exist (skip gracefully)
+      - name: Ensure files exist
         run: |
           mkdir -p boardroom audit_out sources/sheets/twitter
-          touch boardroom/boardroom_picks.csv boardroom/boardroom_picks.md audit_out/twitter_text_signals.csv sources/sheets/twitter/tweets.csv
+          : > boardroom/boardroom_picks.csv
+          : > boardroom/boardroom_picks.md
+          : > audit_out/twitter_text_signals.csv
+          : > sources/sheets/twitter/tweets.csv
 
       - name: Prepare payload
+        shell: bash
         run: |
           python - <<'PY'
-import json, os, base64
-def load(p): 
-    try:
-        with open(p,'rb') as f: 
-            d=f.read().decode('utf-8',errors='replace')
-    except Exception:
-        d=""
-    return d
-
-files = {
-  "boardroom_picks.csv": {"content": load("boardroom/boardroom_picks.csv")},
-  "boardroom_picks.md":  {"content": load("boardroom/boardroom_picks.md")},
-  "twitter_text_signals.csv": {"content": load("audit_out/twitter_text_signals.csv")},
-  "tweets.csv": {"content": load("sources/sheets/twitter/tweets.csv")}
-}
-with open("gist_payload.json","w") as f:
-    json.dump({"files": files}, f)
-print("Wrote gist_payload.json")
-PY
+          import json, os
+          def load(p):
+              try:
+                  return open(p,'r',encoding='utf-8',errors='replace').read()
+              except Exception:
+                  return ""
+          payload = {"files": {
+              "boardroom_picks.csv":      {"content": load("boardroom/boardroom_picks.csv")},
+              "boardroom_picks.md":       {"content": load("boardroom/boardroom_picks.md")},
+              "twitter_text_signals.csv": {"content": load("audit_out/twitter_text_signals.csv")},
+              "tweets.csv":               {"content": load("sources/sheets/twitter/tweets.csv")}
+          }}
+          with open("gist_payload.json","w",encoding="utf-8") as f:
+              json.dump(payload, f)
+          print("Wrote gist_payload.json")
+          PY
 
       - name: Upsert Gist
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
         run: |
           curl -sS -X PATCH \
             -H "Authorization: token ${GIST_TOKEN}" \
