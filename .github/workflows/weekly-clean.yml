@@ -1,0 +1,26 @@
+name: Weekly Clean
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 2"
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rotate splits + prune images
+        run: |
+          mkdir -p archive
+          ts="$(date -u +'%Y%m%d-%H%M%S')"
+          if [ -f splits.csv ]; then
+            cp splits.csv "archive/splits-$ts.csv"
+          fi
+          find images/ -type f -mtime +7 -delete || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add archive/ images/
+          git commit -m "Weekly cleanup $ts [skip ci]" || echo "No changes"
+          git push

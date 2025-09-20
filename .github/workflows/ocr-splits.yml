@@ -1,0 +1,131 @@
+name: OCR Splits
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ocr_splits
+  cancel-in-progress: false
+
+env:
+  TZ: America/Chicago
+  OCR_PROFILES_FILE: scripts/ocr_profiles.yaml
+
+jobs:
+  ocr_splits:
+    runs-on: ubuntu-latest
+    env:
+      SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+      GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: System deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install \
+            gspread google-auth google-auth-oauthlib google-auth-httplib2 \
+            requests beautifulsoup4 lxml pillow pytesseract opencv-python-headless \
+            numpy pandas pyyaml python-dateutil
+
+      - name: Sheets ingest (download tweet images)
+        env:
+          SPLITS_TWEETS_SHEET_ID: ${{ secrets.SPLITS_TWEETS_SHEET_ID }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python3 scripts/sheets_ingest.py
+
+      - name: Pregame scraper (Most Action / Consensus screenshots)
+        run: python3 scripts/pregame_scraper.py
+
+      - name: OCR images -> CSV rows
+        env:
+          PROFILES_PATH: ${{ env.OCR_PROFILES_FILE }}
+        run: python3 scripts/splits_ocr.py
+
+      - name: Merge & push splits.csv without conflicts (dedupe, single header; with retries)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name  "splits-bot"
+          git config user.email "actions@users.noreply.github.com"
+
+          # If nothing was produced, exit quietly
+          [ -f splits.csv ] || { echo "No splits.csv present, nothing to push."; exit 0; }
+
+          # Keep our locally produced CSV safe
+          cp -f splits.csv /tmp/local.csv
+
+          header="timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source"
+
+          attempt=0
+          until [ $attempt -ge 6 ]; do
+            attempt=$((attempt+1))
+            echo "== Attempt $attempt =="
+
+            # Always work on a branch that points at the latest origin/main
+            git fetch origin main
+            git checkout -B ocr-push origin/main
+
+            # Obtain remote CSV content (if present)
+            if git cat-file -e origin/main:splits.csv 2>/dev/null; then
+              git show origin/main:splits.csv > /tmp/remote.csv
+            else
+              : > /tmp/remote.csv
+            fi
+
+            # Build bodies (skip headers if present)
+            { tail -n +2 /tmp/remote.csv 2>/dev/null || true; } > /tmp/remote.body
+            { tail -n +2 /tmp/local.csv  2>/dev/null || true; } > /tmp/local.body
+
+            # Rebuild merged CSV: one header + remote body + local new lines, deduped
+            printf "%s\n" "$header" > splits.csv
+            awk 'NR==FNR{ if(!($0 in seen)){seen[$0]=1; print $0}; next} { if(!($0 in seen)){seen[$0]=1; print $0} }' \
+                /tmp/remote.body /tmp/local.body >> splits.csv
+
+            # Stage any CSVs we produced
+            add_any=false
+            for f in splits.csv splits_clean.csv splits_flagged.csv; do
+              if [ -f "$f" ]; then git add "$f"; add_any=true; fi
+            done
+
+            # Nothing to commit? Done.
+            if ! $add_any || git diff --cached --quiet; then
+              echo "No changes to commit."
+              exit 0
+            fi
+
+            git commit -m "OCR: append new split rows (merged, deduped)"
+
+            # Try to push; if non-fast-forward, retry after a short backoff
+            if git push origin ocr-push:main; then
+              echo "Push OK"
+              exit 0
+            else
+              echo "Non-fast-forward; will retry…"
+              sleep $((2*attempt))
+            fi
+          done
+
+          echo "Push still failing after retries"
+          exit 1
