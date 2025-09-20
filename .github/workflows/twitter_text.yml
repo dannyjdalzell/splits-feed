@@ -1,0 +1,44 @@
+name: twitter-text
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Ensure deps and folders
+        run: |
+          python -m pip install --upgrade pip
+          [ -f requirements.txt ] && pip install -r requirements.txt || true
+          mkdir -p audit_out
+      - name: Ensure keyword dictionary
+        run: |
+          if [ ! -f scripts/keyword_dictionary.json ]; then
+            printf '{"keywords":["reverse line movement","steam","contrarian","handle","ticket","sharp","split","public","consensus","fade","clv","closing line value","percentage","bet%","$%","money%","handle%","tickets%","cash%","line move","buyback"]}\n' > scripts/keyword_dictionary.json
+          fi
+      - name: Analyze Twitter text
+        run: |
+          CSV="sources/sheets/twitter/tweets.csv"
+          DICT="scripts/keyword_dictionary.json"
+          OUT="audit_out/twitter_text_signals.csv"
+          if [ -s "$CSV" ] && [ -s "$DICT" ]; then
+            python scripts/analyze_twitter_text.py --csv "$CSV" --dict "$DICT" --out "$OUT"
+            ls -lh "$OUT" || true
+            head -5 "$OUT" || true
+          else
+            echo "Missing inputs"; exit 1
+          fi
+      - name: Commit analyzer output if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add audit_out/twitter_text_signals.csv
+          if git diff --staged --quiet; then echo "No analyzer changes."; else git commit -m "CI(Twitter text): update signals [skip ci]"; git push; fi
