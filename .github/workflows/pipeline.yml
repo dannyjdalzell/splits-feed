@@ -1,41 +1,36 @@
 name: pipeline
 
 on:
+  workflow_dispatch: {}
   schedule:
-    # every 15 minutes
-    - cron: "*/15 * * * *"
-  workflow_dispatch:
+    - cron: "*/15 * * * *"   # every 15 minutes
+  push:
+    branches: [ main ]
 
 permissions:
   contents: write
 
-concurrency:
-  group: pipeline-${{ github.ref }}
-  cancel-in-progress: false
+env:
+  TZ: America/Chicago
+  PYTHONUNBUFFERED: "1"
 
 jobs:
-  pipeline:
-    runs-on: ubuntu-24.04
+  run:
+    runs-on: ubuntu-latest
 
     steps:
+      # ---------- Repo checkout ----------
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 2
 
-      - name: Set up Python
+      - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m pip install --upgrade pip
-          pip install pandas numpy python-dateutil pytz
-
-      # ---------- INGEST: Google Sheets (Export tab) → repo CSV ----------
+      # ---------- Sheets → CSV (always fresh) ----------
       - name: Sheets → Twitter ingest (always-fresh Export → workspace)
         shell: bash
         run: |
@@ -45,40 +40,35 @@ jobs:
             > sources/sheets/twitter/tweets.csv
           echo "[sheets] wrote $(wc -l < sources/sheets/twitter/tweets.csv) rows → sources/sheets/twitter/tweets.csv"
 
-      # ---------- OCR (images → staged CSV). Safe if there are zero images ----------
-      - name: OCR Splits (images → staged)
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p audit_out
-          if [ -d images ]; then
-            python scripts/splits_ocr.py --images images --out audit_out/splits_staged.csv || echo "[ocr] no rows or script exited non-zero"
-          else
-            echo "[ocr] images/ not present; skipping"
-            : > audit_out/splits_staged.csv
-          fi
-
       # ---------- Twitter text analysis → signals CSV ----------
       - name: Twitter text analysis (signals)
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p audit_out
-          python scripts/analyze_twitter_text.py \
-            --csv sources/sheets/twitter/tweets.csv \
-            --dict dictionaries \
-            --out audit_out/twitter_text_signals.csv
+          if [ -f scripts/analyze_twitter_text.py ]; then
+            python scripts/analyze_twitter_text.py
+          else
+            echo "[warn] scripts/analyze_twitter_text.py not found; skipping"
+          fi
 
-      # ---------- Normalize staged + twitter → boardroom_inputs.csv ----------
+      # ---------- Normalize + merge sources ----------
       - name: Normalize + merge sources
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p audit_out
-          python scripts/normalize_and_merge.py \
-            --splits audit_out/splits_staged.csv \
-            --twitter audit_out/twitter_text_signals.csv \
-            --out audit_out/boardroom_inputs.csv
+          if [ -f scripts/normalize_and_merge.py ]; then
+            python scripts/normalize_and_merge.py
+            echo "[ok] wrote: $GITHUB_WORKSPACE/audit_out/boardroom_inputs.csv"
+          else
+            echo "[warn] scripts/normalize_and_merge.py not found; skipping"
+          fi
+
+      # ---------- NEW: Clean boardroom_inputs before promote ----------
+      - name: Clean boardroom_inputs (drop junk/unresolved before promote)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/clean_boardroom_inputs.py
 
       # ---------- Promote staged → splits.csv (fallback to boardroom_inputs) ----------
       - name: Promote staged → splits.csv (with fallback)
@@ -86,54 +76,34 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import os, sys, pandas as pd
+import csv, sys
+from pathlib import Path
 
-          ROOT = os.getcwd()
-          AOUT = os.path.join(ROOT, "audit_out")
-          staged = os.path.join(AOUT, "splits_staged.csv")
-          board  = os.path.join(AOUT, "boardroom_inputs.csv")
-          OUT    = os.path.join(ROOT, "splits.csv")
+root = Path(__file__).resolve().parents[2]
+staged = root/"audit_out"/"splits_staged.csv"
+board  = root/"audit_out"/"boardroom_inputs.csv"
+out    = root/"splits.csv"
 
-          def exists_nonempty(p): 
-              return os.path.exists(p) and os.path.getsize(p) > 0
+def read_rows(p):
+    if not p.exists(): return []
+    with p.open() as f:
+        return list(csv.DictReader(f))
 
-          def promote_from_df(df):
-              need = {"timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"}
-              if not need.issubset(df.columns):
-                  # best-effort column mapping
-                  if {"team_a","team_b"}.issubset(df.columns):
-                      df = df.rename(columns={"team_a":"away_team","team_b":"home_team"})
-              for col in ["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"]:
-                  if col not in df.columns:
-                      df[col] = ""
-              df = df.fillna("")
-              df = df[(df["away_team"].str.len()>1) & (df["home_team"].str.len()>1)]
-              if df.empty: 
-                  return None
-              return df[["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"]]
+rows = read_rows(staged)
+if rows:
+    print(f"PROMOTE_OK (staged) rows: {len(rows)}")
+else:
+    print("staged present but no valid rows; falling back")
+    rows = read_rows(board)
+    print(f"PROMOTE_OK (fallback) rows: {len(rows)}")
 
-          # 1) staged
-          if exists_nonempty(staged):
-              ds = pd.read_csv(staged, dtype=str).fillna("")
-              out = promote_from_df(ds)
-              if out is not None and len(out):
-                  out.to_csv(OUT, index=False)
-                  print(f"PROMOTE_OK (staged) rows: {len(out)}")
-                  sys.exit(0)
-              else:
-                  print("staged present but no valid rows; falling back")
-
-          # 2) fallback boardroom_inputs
-          if exists_nonempty(board):
-              db = pd.read_csv(board, dtype=str).fillna("")
-              out = promote_from_df(db)
-              if out is not None and len(out):
-                  out.to_csv(OUT, index=False)
-                  print(f"PROMOTE_OK (fallback) rows: {len(out)}")
-                  sys.exit(0)
-
-          print("nothing promotable (no valid rows)")
-          PY
+if rows:
+    with out.open("w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys())
+        w.writeheader(); w.writerows(rows)
+else:
+    print("[warn] nothing to promote; leaving splits.csv unchanged")
+PY
 
       # ---------- Live delta analysis (writes reports/) ----------
       - name: Live delta analysis (rolling; stop 15m pre-start)
@@ -149,29 +119,17 @@ jobs:
       # ---------- Commit outputs (rebase-safe) ----------
       - name: Commit outputs
         shell: bash
-        env:
-          GIT_AUTHOR_NAME: splits-bot
-          GIT_AUTHOR_EMAIL: actions@users.noreply.github.com
-          GIT_COMMITTER_NAME: splits-bot
-          GIT_COMMITTER_EMAIL: actions@users.noreply.github.com
         run: |
           set -euo pipefail
           git config user.name  "splits-bot"
           git config user.email "actions@users.noreply.github.com"
-
-          # Stage everything the pipeline may update
           git add sources/sheets/twitter/tweets.csv || true
           git add audit_out/twitter_text_signals.csv audit_out/boardroom_inputs.csv || true
           git add splits.csv || true
           test -d reports && git add -A reports || true
 
-          # If nothing staged, exit quietly
-          if git diff --cached --quiet; then
-            echo "no changes"
-            exit 0
-          fi
+          git diff --cached --quiet && { echo "no changes"; exit 0; }
 
-          # Rebase before push to dodge non-fast-forward
           git fetch origin
           git pull --rebase origin main || git rebase --strategy-option=theirs origin/main || true
 
