@@ -2,18 +2,11 @@ name: Splits Guard/Normalizer
 on:
   schedule: [{ cron: "*/15 * * * *" }]
   workflow_dispatch:
-  push:
-    branches: [ main ]
-    paths:
-      - "scripts/splits_guard_clean.py"
-      - "splits.csv"
-      - "audit_out/splits_staged.csv"
-concurrency: { group: splits-guard, cancel-in-progress: true }
-
+permissions:
+  contents: write
 jobs:
-  run:
+  guard:
     runs-on: ubuntu-latest
-    permissions: { contents: write }
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
@@ -23,15 +16,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pandas
-      - name: Clean & promote splits
-        run: python scripts/splits_guard_clean.py
-      - name: Commit if changed
+      - name: Run guard
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add splits.csv splits_clean.csv splits_flagged.csv || true
-          if git diff --staged --quiet; then
-            echo "No changes."
-          else
-            git commit -m "CI(splits-guard): clean & promote splits" && git push
-          fi
+          mkdir -p audit_out
+          test -f splits.csv || printf "timestamp,away_team,home_team,market,tickets_pct,handle_pct,line,source\n" > splits.csv
+          python scripts/splits_guard_clean.py --in splits.csv --out splits_clean.csv --teams scripts/team_dictionary.json --promote
+      - name: Commit cleaned splits
+        run: |
+          set -e
+          git config user.name  "splits-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add splits.csv splits_clean.csv || true
+          git diff --cached --quiet || git commit -m "splits-guard: promote clean → splits.csv"
+          git push
