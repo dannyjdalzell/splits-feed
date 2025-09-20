@@ -1,74 +1,137 @@
-#!/usr/bin/env python3
-import csv, json, re, sys
+name: pipeline
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+env:
+  TZ: America/Chicago
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---------- Repo checkout ----------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # ---------- Sheets → CSV (always fresh) ----------
+      - name: Sheets → Twitter ingest (always-fresh Export → workspace)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p sources/sheets/twitter
+          curl -Lsf "https://docs.google.com/spreadsheets/d/e/2PACX-1vT39ngJbPzNRjcnKVG-Oehiy4qzyrghIvCI0FQbaBj2jc9LYGLbMUZaCQDGN8Ck_8Q465hqsR4AYz3k/pub?gid=77061416&single=true&output=csv" \
+            > sources/sheets/twitter/tweets.csv
+          echo "[sheets] wrote $(wc -l < sources/sheets/twitter/tweets.csv) rows → sources/sheets/twitter/tweets.csv"
+
+      # ---------- Twitter text analysis → signals CSV ----------
+      - name: Twitter text analysis (signals)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f scripts/analyze_twitter_text.py ]; then
+            python scripts/analyze_twitter_text.py
+          else
+            echo "[warn] scripts/analyze_twitter_text.py not found; skipping"
+          fi
+
+      # ---------- Normalize + merge sources ----------
+      - name: Normalize + merge sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f scripts/normalize_and_merge.py ]; then
+            python scripts/normalize_and_merge.py
+            echo "[ok] wrote: $GITHUB_WORKSPACE/audit_out/boardroom_inputs.csv"
+          else
+            echo "[warn] scripts/normalize_and_merge.py not found; skipping"
+          fi
+
+      # ---------- NEW: Clean boardroom_inputs before promote ----------
+      - name: Clean boardroom_inputs (drop junk/unresolved before promote)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/clean_boardroom_inputs.py
+
+      # ---------- Promote staged → splits.csv (fallback to boardroom_inputs) ----------
+      - name: Promote staged → splits.csv (with fallback)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+import csv, sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-inp  = ROOT / "audit_out" / "boardroom_inputs.csv"
-outp = ROOT / "audit_out" / "boardroom_inputs.csv"   # in-place clean
-rej  = ROOT / "audit_out" / "unresolved_from_boardroom.txt"
+root = Path(__file__).resolve().parents[2]
+staged = root/"audit_out"/"splits_staged.csv"
+board  = root/"audit_out"/"boardroom_inputs.csv"
+out    = root/"splits.csv"
 
-LEAGUES  = {"NFL","NCAAF","NBA","NCAAB","MLB","NHL","UFC/MMA"}
-MARKETS  = {"ML","Spread","Total"}
-BAD_PAT  = re.compile(r"(Estimating|SPORTSBOOK|Expanded Splits|Total Bets|CFB -)", re.I)
-ALPHAOK  = re.compile(r"[A-Za-z]")
+def read_rows(p):
+    if not p.exists(): return []
+    with p.open() as f:
+        return list(csv.DictReader(f))
 
-# load team dictionaries (strict resolve required)
-dict_dir = ROOT / "dictionaries"
-team_maps = []
-for f in ["nfl.json","ncaaf_fbs_seed.json","nba.json","ncaab.json","mlb.json","nhl.json"]:
-    p = dict_dir / f
-    if p.exists():
-        try:
-            team_maps.append(json.loads(p.read_text()))
-        except Exception:
-            pass
+rows = read_rows(staged)
+if rows:
+    print(f"PROMOTE_OK (staged) rows: {len(rows)}")
+else:
+    print("staged present but no valid rows; falling back")
+    rows = read_rows(board)
+    print(f"PROMOTE_OK (fallback) rows: {len(rows)}")
 
-def resolvable(name: str) -> bool:
-    if not name or not ALPHAOK.search(name): return False
-    n = name.strip().lower()
-    for m in team_maps:
-        if n in (k.lower() for k in m.keys()): return True
-        if n in (str(v).lower() for v in m.values()): return True
-    return False
+if rows:
+    with out.open("w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys())
+        w.writeheader(); w.writerows(rows)
+else:
+    print("[warn] nothing to promote; leaving splits.csv unchanged")
+PY
 
-if not inp.exists():
-    print("[clean] no boardroom_inputs.csv found; nothing to do")
-    sys.exit(0)
+      # ---------- Live delta analysis (writes reports/) ----------
+      - name: Live delta analysis (rolling; stop 15m pre-start)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f scripts/live_delta_analysis.py ]; then
+            python scripts/live_delta_analysis.py || echo "[live-delta] script returned non-zero"
+          else
+            echo "[live-delta] scripts/live_delta_analysis.py not found; skipping"
+          fi
 
-rows = list(csv.DictReader(inp.open()))
-keep, drop = [], []
+      # ---------- Commit outputs (rebase-safe) ----------
+      - name: Commit outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name  "splits-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add sources/sheets/twitter/tweets.csv || true
+          git add audit_out/twitter_text_signals.csv audit_out/boardroom_inputs.csv || true
+          git add splits.csv || true
+          test -d reports && git add -A reports || true
 
-for r in rows:
-    lg  = (r.get("league") or "").strip()
-    aw  = (r.get("away_team") or "").strip()
-    hm  = (r.get("home_team") or "").strip()
-    mkt = (r.get("market") or "").strip()
-    tp  = (r.get("tickets_pct") or "").strip()
-    hp  = (r.get("handle_pct") or "").strip()
+          git diff --cached --quiet && { echo "no changes"; exit 0; }
 
-    # hard filters
-    if lg not in LEAGUES:                          drop.append((r,"league"));   continue
-    if mkt not in MARKETS:                         drop.append((r,"market"));   continue
-    if BAD_PAT.search(aw) or BAD_PAT.search(hm):   drop.append((r,"badstr"));   continue
-    if not resolvable(aw) or not resolvable(hm):   drop.append((r,"resolve"));  continue
-    if not tp and not hp:                          drop.append((r,"empty%"));   continue
+          git fetch origin
+          git pull --rebase origin main || git rebase --strategy-option=theirs origin/main || true
 
-    keep.append(r)
-
-# write back (in-place overwrite)
-if keep:
-    with outp.open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=keep[0].keys())
-        w.writeheader()
-        w.writerows(keep)
-
-# log rejections
-if drop:
-    rej.parent.mkdir(parents=True, exist_ok=True)
-    with rej.open("w") as f:
-        for r, why in drop:
-            f.write(f"[{why}] {r}\n")
-
-print(f"[clean] kept={len(keep)} dropped={len(drop)} → {outp}")
-if drop:
-    print(f"[clean] details → {rej}")
+          git commit -m "ci: refresh + promote + live-delta (auto)" || true
+          git push || echo "[push] remote moved; will land next cycle"
