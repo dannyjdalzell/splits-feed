@@ -1,30 +1,34 @@
-name: Splits Guard/Normalizer
-on:
-  schedule: [{ cron: "*/15 * * * *" }]
-  workflow_dispatch:
+- name: Commit clean splits with rebase & retry
+  run: |
+    set -euo pipefail
+    git config user.name  "splits-bot"
+    git config user.email "bot@users.noreply.github.com"
 
-permissions:
-  contents: write
+    BRANCH="${GITHUB_REF_NAME:-main}"
 
-jobs:
-  guard:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - name: Deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install pandas
-      - name: Run guard (dictionary-less)
-        run: |
-          python scripts/splits_guard_clean.py --in splits.csv --out splits_clean.csv --promote
-      - name: Commit cleaned splits
-        run: |
-          git config user.name  "splits-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add splits.csv splits_clean.csv || true
-          git diff --cached --quiet || git commit -m "splits-guard: promote clean → splits.csv (no dictionary)"
-          git push
+    # Stage & commit if there are changes
+    git add splits.csv splits_clean.csv || true
+    if git diff --cached --quiet; then
+      echo "No changes to commit."
+      exit 0
+    fi
+    git commit -m "splits-guard: promote clean → splits.csv (no dictionary)" || true
+
+    # Rebase + retry push (prefer ours for generated files)
+    for attempt in 1 2 3 4 5; do
+      if git push origin "HEAD:${BRANCH}"; then
+        echo "Pushed on attempt $attempt"
+        exit 0
+      fi
+      echo "Push failed (attempt $attempt). Rebasing onto origin/${BRANCH}…"
+      git fetch origin "${BRANCH}"
+      if ! git pull --rebase origin "${BRANCH}"; then
+        echo "Rebase conflict; preferring ours for generated artifacts."
+        git checkout --ours -- splits.csv splits_clean.csv || true
+        git add splits.csv splits_clean.csv || true
+        git rebase --continue || true
+      fi
+      sleep $((RANDOM%5+2))
+    done
+    echo "Failed to push after retries." >&2
+    exit 1
