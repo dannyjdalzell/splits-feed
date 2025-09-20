@@ -1,4 +1,4 @@
-name: Boardroom LIVE (build + publish, strict)
+name: Boardroom LIVE (build + render + publish, strict)
 
 on:
   schedule: [{ cron: "*/15 * * * *" }]
@@ -22,22 +22,37 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install pandas; fi
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pandas
+          fi
 
       - name: Ensure folders
         run: |
           mkdir -p boardroom audit_out sources/sheets/twitter
 
-      - name: Build boardroom picks
+      - name: Build (legacy picks) if script exists
         run: |
-          if [ -s audit_out/twitter_text_signals.csv ] && [ -s splits.csv ]; then
-            python scripts/boardroom_picks.py \
-              --signals audit_out/twitter_text_signals.csv \
-              --splits   splits.csv
+          if [ -s audit_out/twitter_text_signals.csv ] && [ -s splits.csv ] && [ -f scripts/boardroom_picks.py ]; then
+            python scripts/boardroom_picks.py --signals audit_out/twitter_text_signals.csv --splits splits.csv || true
           else
-            echo "::warning::Missing signals or splits; publishing placeholders."
             : > boardroom/boardroom_picks.csv
             : > boardroom/boardroom_picks.md
+          fi
+
+      - name: Clean + deep analysis render
+        run: |
+          if [ -f scripts/boardroom_render.py ]; then
+            python scripts/boardroom_render.py \
+              --picks_csv boardroom/boardroom_picks.csv \
+              --signals   audit_out/twitter_text_signals.csv \
+              --splits    splits.csv \
+              --teams     scripts/team_dictionary.json \
+              --hours     72 --min_signals 2 --star5 6.0 --star4 3.5
+          else
+            echo "::error::scripts/boardroom_render.py missing."
+            exit 1
           fi
 
       - name: Commit artifacts if changed
@@ -48,20 +63,17 @@ jobs:
           if git diff --staged --quiet; then
             echo "No boardroom changes."
           else
-            git commit -m "CI(Boardroom): update picks [skip ci]"
+            git commit -m "CI(Boardroom): clean render [skip ci]"
             git push
           fi
 
       - name: Prepare Gist payload
         run: |
           python - <<'PY'
-          import json, os, io
+          import json, os
           def load(p):
-              try: 
-                  with open(p,'r',encoding='utf-8',errors='replace') as f:
-                      return f.read()
-              except Exception:
-                  return ""
+              try: return open(p,'r',encoding='utf-8',errors='replace').read()
+              except Exception: return ""
           payload = {"files":{
             "boardroom_picks.csv":      {"content": load("boardroom/boardroom_picks.csv")},
             "boardroom_picks.md":       {"content": load("boardroom/boardroom_picks.md")},
@@ -70,10 +82,8 @@ jobs:
             "splits.csv":               {"content": load("splits.csv")}
           }}
           open("gist_payload.json","w",encoding="utf-8").write(json.dumps(payload))
-          # Print sizes so we know we're sending something
-          import os
           for p in ["boardroom/boardroom_picks.csv","boardroom/boardroom_picks.md","audit_out/twitter_text_signals.csv","sources/sheets/twitter/tweets.csv","splits.csv"]:
-              print(f"SEND {p}: {'missing' if not os.path.exists(p) else os.path.getsize(p)} bytes")
+              print("SEND", p, os.path.exists(p) and os.path.getsize(p) or 0, "bytes")
           PY
 
       - name: Verify Gist config
@@ -81,7 +91,7 @@ jobs:
           set -e
           echo "Gist URL: https://gist.github.com/${{ github.repository_owner }}/${GIST_ID}"
           if [ -z "${GIST_ID:-}" ]; then echo "GIST_ID missing"; exit 1; fi
-          if [ -z "${GIST_TOKEN:-}" ]; then echo "GIST_TOKEN missing (add a CLASSIC PAT with 'gist' scope)"; exit 1; fi
+          if [ -z "${GIST_TOKEN:-}" ]; then echo "GIST_TOKEN missing (classic PAT with 'gist' scope)"; exit 1; fi
 
       - name: Publish to Gist (strict)
         run: |
@@ -92,7 +102,6 @@ jobs:
             https://api.github.com/gists/${GIST_ID} \
             -d @gist_payload.json)
           echo "HTTP ${http_code}"
-          # Show result keys (not file contents)
           python - <<'PY'
           import json
           j=json.load(open("resp.json","r",encoding="utf-8"))
