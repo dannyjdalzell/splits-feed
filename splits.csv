@@ -1,4 +1,16 @@
 image_filename,image_sha256,image_bytes,image_mtime_utc,source,league,event_date,teams,market,side,handle_pct,bets_pct,odds,total_value,ticket_count,notes
+2025-09-20T17:07:38+00:00,Unknown,Estimating resolution as 162,ne Mona a,ML,3,,-195,TW_OTHER_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,MLB,M Maryland,Western Illinois,Spread,16,89,+275,CIRCA_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,MLB,Money,Washington Nationals,Spread,97,60,+3,CIRCA_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,Unknown,&& Washington ST,UC Davis,Spread,37,82,+4,TW_OTHER_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,Unknown,Estimating resolution as 264,SPORTSBOOK Betting Splits Expanded Splits,Spread,38,,+120,CIRCA_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,Unknown,Handle Bets Total Handle Bets Money idle Bets,Pittsburgh Steelers,Spread,46,,+6,CIRCA_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,MLB,t,Philadelphia Phillies -,Spread,44,41,-1,TW_OTHER_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,Unknown,Los Angeles Chargers,Las Vegas Raiders,Spread,35,,+5,TW_OTHER_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,Unknown,Ss Total Bets,FU,Spread,37,38,+3,TW_OTHER_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,MLB,Estimating resolution as 218,El SPORTSBOOK Betting Splits Expanded Splits,Spread,36,50,+424,CIRCA_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,MLB,Estimating resolution as 205,EF srorrssooe Betting Splits Expanded Splits,Spread,74,21,+110,CIRCA_FAM,,,,,,,
+2025-09-20T17:07:38+00:00,Unknown,Estimating resolution as 200,"CFB - Saturday,Sep 13 Spread Handle Total Handle Bets | Money Ha",Spread,100,,+4,TW_OTHER_FAM,,,,,,,
 GptzWT9WoAA5TP6.jpeg,b2797b94d28c7a5d6065cf698955d61551f9a64ea6cd50eba60295beeca47ee8,133037,2025-09-20T16:28:16.205179+00:00,unknown,,,,consensus,,91,88,-170,,,parsed_by=raw
 G0Kg91GXkAAJVrq.jpeg,bf0a391d8ff5c16c23a234d2037995436890d6b6acc1cb62c09e7e2dc0db0207,139073,2025-09-20T16:28:00.262001+00:00,unknown,,,,consensus,,90,89,-115,,,parsed_by=raw
 G0Ki3Y-XYAA9Glw.jpeg,d5a059ba2c7eb9774251692a44f7e48c9b5eacf79c376a06774b1f86f5fabd95,193541,2025-09-20T16:27:49.067165+00:00,unknown,,,,consensus,,95,88,+130,,,parsed_by=raw
