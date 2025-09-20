@@ -1,2 +1,20 @@
-timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source
-2025-09-20T17:26:39+00:00,NFL,rs Los Angeles Chargers,Las Vegas Raiders,Spread,35.0,3.0,5.0,TW_OTHER_FAM
+image_filename,image_sha256,image_bytes,image_mtime_utc,source,league,event_date,teams,market,side,handle_pct,bets_pct,odds,total_value,ticket_count,notes
+GptzWT9WoAA5TP6.jpeg,b2797b94d28c7a5d6065cf698955d61551f9a64ea6cd50eba60295beeca47ee8,133037,2025-09-20T16:28:16.205179+00:00,unknown,,,,consensus,,91,88,-170,,,parsed_by=raw
+G0Kg91GXkAAJVrq.jpeg,bf0a391d8ff5c16c23a234d2037995436890d6b6acc1cb62c09e7e2dc0db0207,139073,2025-09-20T16:28:00.262001+00:00,unknown,,,,consensus,,90,89,-115,,,parsed_by=raw
+G0Ki3Y-XYAA9Glw.jpeg,d5a059ba2c7eb9774251692a44f7e48c9b5eacf79c376a06774b1f86f5fabd95,193541,2025-09-20T16:27:49.067165+00:00,unknown,,,,consensus,,95,88,+130,,,parsed_by=raw
+G0PvfdFWQAAPNtz.jpeg,b6856700a64a12b6544116fb900860b8625dfba14c82269fe8974be95c69217b,196518,2025-09-20T16:27:38.878642+00:00,unknown,,,,consensus,,85,71,-125,,,parsed_by=raw
+G0ugCmlWkAEOiWA.jpeg,49dcda3d1b55d2dd4974a5f4037d0b8ddc3ba3a9e1d0c0f41326b821041d011f,235867,2025-09-20T16:27:28.722924+00:00,unknown,,,,consensus,,95,91,+145,,,parsed_by=raw
+G00AhouXMAAkO2b.jpeg,22e8f9813e973cf5fad3e946192b9842dc80824794ae10f7ff8b2cf101c44148,284752,2025-09-20T16:27:09.784914+00:00,unknown,,,,consensus,,44,9,-195,,,parsed_by=raw
+G1OauqgXYAAyuyS.jpeg,4d3610374bcf1b3f55a713ec59b2dbeb025b1464db83763a7672a990c06eb8de,85778,2025-09-20T16:26:17.577156+00:00,unknown,,,,consensus,,89,62,+240,,,parsed_by=raw
+G1PISHdWYAAuMbT.png,17e0981222a2f2d70740c12e6cdc564b9c4f893ec088c1f787787e4f4c52f1ca,188154,2025-09-20T16:25:35.677328+00:00,unknown,,,,consensus,,98,95,+100,,,parsed_by=raw
+G1S98F9WQAA715I.png,d16913914272e771a1f3f666a9e54b6f5a6013b45b83f0e1facdf52faf3dfe83,112198,2025-09-20T16:25:03.746525+00:00,unknown,,,,consensus,,96,92,+145,,,parsed_by=raw
+G1TQEejXIAAf0-v.jpeg,a75e6a1b232dc6a9f372dc31ac02a3a20271d4789c1af15bafaadde5c12028ba,184649,2025-09-20T16:15:32.576878+00:00,unknown,,,,consensus,,,,,9,,parsed_by=raw
+G1TQUJgXsAAaYZw.jpeg,03ffdaf4c0b417b7ca5f0be8c1dda0c80e2255c03783ca53eb5cf9cd57b910d8,190283,2025-09-20T16:14:55.114928+00:00,unknown,,,,consensus,,1,,,,,parsed_by=raw
+,,,,CIRCA_FAM,Unknown,,,Spread,,,,,,,
+,,,,CIRCA_FAM,MLB,,,Spread,,21,,,,,
+,,,,TW_OTHER_FAM,MLB,,,Spread,,41,,,,,
+,,,,TW_OTHER_FAM,Unknown,,,Spread,,38,,,,,
+,,,,TW_OTHER_FAM,Unknown,,,Spread,,82,,,,,
+,,,,CIRCA_FAM,MLB,,,Spread,,89,,,,,
+,,,,CIRCA_FAM,MLB,,,Spread,,60,,,,,
+,,,,CIRCA_FAM,MLB,,,Spread,,50,,,,,
