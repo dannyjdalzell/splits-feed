@@ -1,95 +1,64 @@
 name: pipeline
-
 on:
-  schedule:
-    - cron: "*/15 * * * *"   # every 15m
-  workflow_dispatch: {}
-
-permissions:
-  contents: write
-
-concurrency:
-  group: pipeline-${{ github.ref }}
-  cancel-in-progress: false
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'images/**'
+      - 'scripts/**'
+      - 'sources/**'
+      - '.github/workflows/pipeline.yml'
 
 jobs:
-  run:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - name: Install deps
+      - name: Upgrade pip and install requirements (best-effort)
         run: |
           python -m pip install --upgrade pip
-          pip install pillow pytesseract pandas numpy requests
+          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
 
-      # ---------- Sheets → workspace ----------
-      - name: Sheets -> Twitter ingest (Export → workspace)
-        shell: bash
+      - name: Run OCR pipeline if present
         run: |
-          set -euo pipefail
-          mkdir -p sources/sheets/twitter
-          curl -Lsf "https://docs.google.com/spreadsheets/d/e/2PACX-1vT39ngJbPzNRjcnKVG-Oehiy4qzyrghIvCI0FQbaBj2jc9LYGLbMUZaCQDGN8Ck_8Q465hqsR4AYz3k/pub?gid=77061416&single=true&output=csv" \
-            > sources/sheets/twitter/tweets.csv
-          echo "[sheets] wrote $(wc -l < sources/sheets/twitter/tweets.csv) rows -> sources/sheets/twitter/tweets.csv"
-
-      # ---------- Twitter text → signals ----------
-      - name: Twitter text analysis (signals)
-        run: |
-          python scripts/analyze_twitter_text.py
-          ls -lh audit_out/twitter_text_signals.csv || true
-          head -5 audit_out/twitter_text_signals.csv || true
-
-      # ---------- Normalize + merge ----------
-      - name: Normalize + merge sources
-        run: |
-          python scripts/normalize_and_merge.py
-          ls -lh audit_out/boardroom_inputs.csv || true
-          head -5 audit_out/boardroom_inputs.csv || true
-
-      # ---------- Clean boardroom_inputs BEFORE promote ----------
-      - name: Clean boardroom_inputs (drop junk/unresolved before promote)
-        run: |
-          python scripts/clean_boardroom_inputs.py
-          echo "[clean] post-clean peek:"
-          head -5 audit_out/boardroom_inputs.csv || true
-
-      # ---------- Promote to splits.csv ----------
-      - name: Promote staged -> splits.csv (with fallback)
-        run: |
-          python scripts/promote_splits.py
-          ls -lh splits.csv || true
-          head -5 splits.csv || true
-
-      # ---------- Live delta analysis ----------
-      - name: Live delta analysis (rolling; stop 15m pre-start)
-        run: |
-          if [ -f scripts/live_delta_analysis.py ]; then
-            python scripts/live_delta_analysis.py || echo "[live-delta] script returned non-zero"
+          if [ -f scripts/splits_ocr.py ]; then
+            python scripts/splits_ocr.py
           else
-            echo "[live-delta] scripts/live_delta_analysis.py not found; skipping"
+            echo "::warning::scripts/splits_ocr.py not found. Skipping OCR."
           fi
 
-      # ---------- Commit outputs (rebase-safe) ----------
-      - name: Commit outputs
-        shell: bash
+      - name: Analyze Twitter text if inputs exist
         run: |
-          set -euo pipefail
-          git config user.name  "splits-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add sources/sheets/twitter/tweets.csv || true
-          git add audit_out/twitter_text_signals.csv audit_out/boardroom_inputs.csv || true
-          git add splits.csv reports || true
-          git diff --cached --quiet && { echo "no changes"; exit 0; }
-          git fetch origin
-          git pull --rebase origin main || git rebase --strategy-option=theirs origin/main
-          git commit -m "ci: refresh + promote + live-delta (auto)"
-          git push
+          CSV="splits-feed/sources/sheets/twitter/tweets.csv"
+          DICT="scripts/keyword_dictionary.json"
+          OUT="splits-feed/audit_out/twitter_text_signals.csv"
+          if [ -f "$CSV" ] && [ -f "$DICT" ]; then
+            python scripts/analyze_twitter_text.py --csv "$CSV" --dict "$DICT" --out "$OUT"
+            ls -lh "$OUT" || true
+            head -5 "$OUT" || true
+          else
+            echo "::warning::Missing $CSV or $DICT. Skipping analyze_twitter_text.py"
+          fi
+
+      - name: Commit results if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "CI: update artifacts [skip ci]"
+            git push
+          fi
