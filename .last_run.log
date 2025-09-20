@@ -1,0 +1,360 @@
+pipeline	Set up job	﻿2025-09-20T00:08:10.4400515Z Current runner version: '2.328.0'
+pipeline	Set up job	2025-09-20T00:08:10.4436104Z ##[group]Runner Image Provisioner
+pipeline	Set up job	2025-09-20T00:08:10.4437366Z Hosted Compute Agent
+pipeline	Set up job	2025-09-20T00:08:10.4438644Z Version: 20250829.383
+pipeline	Set up job	2025-09-20T00:08:10.4439662Z Commit: 27cb235aab5b0e52e153a26cd86b4742e89dac5d
+pipeline	Set up job	2025-09-20T00:08:10.4440957Z Build Date: 2025-08-29T13:48:48Z
+pipeline	Set up job	2025-09-20T00:08:10.4442193Z ##[endgroup]
+pipeline	Set up job	2025-09-20T00:08:10.4443040Z ##[group]Operating System
+pipeline	Set up job	2025-09-20T00:08:10.4444036Z Ubuntu
+pipeline	Set up job	2025-09-20T00:08:10.4444740Z 24.04.3
+pipeline	Set up job	2025-09-20T00:08:10.4445682Z LTS
+pipeline	Set up job	2025-09-20T00:08:10.4446364Z ##[endgroup]
+pipeline	Set up job	2025-09-20T00:08:10.4447160Z ##[group]Runner Image
+pipeline	Set up job	2025-09-20T00:08:10.4448313Z Image: ubuntu-24.04
+pipeline	Set up job	2025-09-20T00:08:10.4449212Z Version: 20250907.24.1
+pipeline	Set up job	2025-09-20T00:08:10.4450885Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250907.24/images/ubuntu/Ubuntu2404-Readme.md
+pipeline	Set up job	2025-09-20T00:08:10.4453568Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250907.24
+pipeline	Set up job	2025-09-20T00:08:10.4455700Z ##[endgroup]
+pipeline	Set up job	2025-09-20T00:08:10.4457345Z ##[group]GITHUB_TOKEN Permissions
+pipeline	Set up job	2025-09-20T00:08:10.4461457Z Contents: write
+pipeline	Set up job	2025-09-20T00:08:10.4462380Z Metadata: read
+pipeline	Set up job	2025-09-20T00:08:10.4463151Z ##[endgroup]
+pipeline	Set up job	2025-09-20T00:08:10.4466571Z Secret source: Actions
+pipeline	Set up job	2025-09-20T00:08:10.4468360Z Prepare workflow directory
+pipeline	Set up job	2025-09-20T00:08:10.4884605Z Prepare all required actions
+pipeline	Set up job	2025-09-20T00:08:10.4939779Z Getting action download info
+pipeline	Set up job	2025-09-20T00:08:10.8324832Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+pipeline	Set up job	2025-09-20T00:08:11.3605998Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+pipeline	Set up job	2025-09-20T00:08:11.5648839Z Complete job name: pipeline
+pipeline	Checkout	﻿2025-09-20T00:08:11.6379098Z ##[group]Run actions/checkout@v4
+pipeline	Checkout	2025-09-20T00:08:11.6380021Z with:
+pipeline	Checkout	2025-09-20T00:08:11.6380417Z   fetch-depth: 1
+pipeline	Checkout	2025-09-20T00:08:11.6380876Z   repository: dannyjdalzell/splits-feed
+pipeline	Checkout	2025-09-20T00:08:11.6381591Z   token: ***
+pipeline	Checkout	2025-09-20T00:08:11.6382034Z   ssh-strict: true
+pipeline	Checkout	2025-09-20T00:08:11.6382449Z   ssh-user: git
+pipeline	Checkout	2025-09-20T00:08:11.6382871Z   persist-credentials: true
+pipeline	Checkout	2025-09-20T00:08:11.6383361Z   clean: true
+pipeline	Checkout	2025-09-20T00:08:11.6383787Z   sparse-checkout-cone-mode: true
+pipeline	Checkout	2025-09-20T00:08:11.6384300Z   fetch-tags: false
+pipeline	Checkout	2025-09-20T00:08:11.6384724Z   show-progress: true
+pipeline	Checkout	2025-09-20T00:08:11.6385162Z   lfs: false
+pipeline	Checkout	2025-09-20T00:08:11.6385559Z   submodules: false
+pipeline	Checkout	2025-09-20T00:08:11.6386000Z   set-safe-directory: true
+pipeline	Checkout	2025-09-20T00:08:11.6386696Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:11.7436363Z Syncing repository: dannyjdalzell/splits-feed
+pipeline	Checkout	2025-09-20T00:08:11.7438558Z ##[group]Getting Git version info
+pipeline	Checkout	2025-09-20T00:08:11.7439352Z Working directory is '/home/runner/work/splits-feed/splits-feed'
+pipeline	Checkout	2025-09-20T00:08:11.7440490Z [command]/usr/bin/git version
+pipeline	Checkout	2025-09-20T00:08:11.8672173Z git version 2.51.0
+pipeline	Checkout	2025-09-20T00:08:11.8698879Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:11.8712937Z Temporarily overriding HOME='/home/runner/work/_temp/3cbd2bef-5023-4b64-b90f-45f75fe7bb39' before making global git config changes
+pipeline	Checkout	2025-09-20T00:08:11.8714461Z Adding repository directory to the temporary git global config as a safe directory
+pipeline	Checkout	2025-09-20T00:08:11.8718854Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/splits-feed/splits-feed
+pipeline	Checkout	2025-09-20T00:08:11.8805205Z Deleting the contents of '/home/runner/work/splits-feed/splits-feed'
+pipeline	Checkout	2025-09-20T00:08:11.8808837Z ##[group]Initializing the repository
+pipeline	Checkout	2025-09-20T00:08:11.8812765Z [command]/usr/bin/git init /home/runner/work/splits-feed/splits-feed
+pipeline	Checkout	2025-09-20T00:08:11.9746774Z hint: Using 'master' as the name for the initial branch. This default branch name
+pipeline	Checkout	2025-09-20T00:08:11.9747994Z hint: is subject to change. To configure the initial branch name to use in all
+pipeline	Checkout	2025-09-20T00:08:11.9749385Z hint: of your new repositories, which will suppress this warning, call:
+pipeline	Checkout	2025-09-20T00:08:11.9750184Z hint:
+pipeline	Checkout	2025-09-20T00:08:11.9750757Z hint: 	git config --global init.defaultBranch <name>
+pipeline	Checkout	2025-09-20T00:08:11.9751488Z hint:
+pipeline	Checkout	2025-09-20T00:08:11.9752452Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+pipeline	Checkout	2025-09-20T00:08:11.9753643Z hint: 'development'. The just-created branch can be renamed via this command:
+pipeline	Checkout	2025-09-20T00:08:11.9754551Z hint:
+pipeline	Checkout	2025-09-20T00:08:11.9755013Z hint: 	git branch -m <name>
+pipeline	Checkout	2025-09-20T00:08:11.9755576Z hint:
+pipeline	Checkout	2025-09-20T00:08:11.9756317Z hint: Disable this message with "git config set advice.defaultBranchName false"
+pipeline	Checkout	2025-09-20T00:08:11.9787685Z Initialized empty Git repository in /home/runner/work/splits-feed/splits-feed/.git/
+pipeline	Checkout	2025-09-20T00:08:11.9799868Z [command]/usr/bin/git remote add origin https://github.com/dannyjdalzell/splits-feed
+pipeline	Checkout	2025-09-20T00:08:11.9920414Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:11.9921224Z ##[group]Disabling automatic garbage collection
+pipeline	Checkout	2025-09-20T00:08:11.9924207Z [command]/usr/bin/git config --local gc.auto 0
+pipeline	Checkout	2025-09-20T00:08:11.9952431Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:11.9953122Z ##[group]Setting up auth
+pipeline	Checkout	2025-09-20T00:08:11.9959145Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pipeline	Checkout	2025-09-20T00:08:11.9988934Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pipeline	Checkout	2025-09-20T00:08:12.1673103Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pipeline	Checkout	2025-09-20T00:08:12.1702813Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pipeline	Checkout	2025-09-20T00:08:12.1921648Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+pipeline	Checkout	2025-09-20T00:08:12.1954765Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:12.1955571Z ##[group]Fetching the repository
+pipeline	Checkout	2025-09-20T00:08:12.1963659Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +1563ddf9ddb58dba50a9ded25b2ab473205cacad:refs/remotes/origin/main
+pipeline	Checkout	2025-09-20T00:08:13.3416589Z From https://github.com/dannyjdalzell/splits-feed
+pipeline	Checkout	2025-09-20T00:08:13.3418457Z  * [new ref]         1563ddf9ddb58dba50a9ded25b2ab473205cacad -> origin/main
+pipeline	Checkout	2025-09-20T00:08:13.3492123Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:13.3493508Z ##[group]Determining the checkout info
+pipeline	Checkout	2025-09-20T00:08:13.3494924Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:13.3500302Z [command]/usr/bin/git sparse-checkout disable
+pipeline	Checkout	2025-09-20T00:08:13.3591787Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+pipeline	Checkout	2025-09-20T00:08:13.3621491Z ##[group]Checking out the ref
+pipeline	Checkout	2025-09-20T00:08:13.3625191Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+pipeline	Checkout	2025-09-20T00:08:13.6016308Z Switched to a new branch 'main'
+pipeline	Checkout	2025-09-20T00:08:13.6017708Z branch 'main' set up to track 'origin/main'.
+pipeline	Checkout	2025-09-20T00:08:13.6038433Z ##[endgroup]
+pipeline	Checkout	2025-09-20T00:08:13.6082013Z [command]/usr/bin/git log -1 --format=%H
+pipeline	Checkout	2025-09-20T00:08:13.6105335Z 1563ddf9ddb58dba50a9ded25b2ab473205cacad
+pipeline	Set up Python	﻿2025-09-20T00:08:13.6322724Z ##[group]Run actions/setup-python@v5
+pipeline	Set up Python	2025-09-20T00:08:13.6323109Z with:
+pipeline	Set up Python	2025-09-20T00:08:13.6323340Z   python-version: 3.11
+pipeline	Set up Python	2025-09-20T00:08:13.6323604Z   check-latest: false
+pipeline	Set up Python	2025-09-20T00:08:13.6323982Z   token: ***
+pipeline	Set up Python	2025-09-20T00:08:13.6324225Z   update-environment: true
+pipeline	Set up Python	2025-09-20T00:08:13.6324500Z   allow-prereleases: false
+pipeline	Set up Python	2025-09-20T00:08:13.6324753Z   freethreaded: false
+pipeline	Set up Python	2025-09-20T00:08:13.6325005Z ##[endgroup]
+pipeline	Set up Python	2025-09-20T00:08:13.7942832Z ##[group]Installed versions
+pipeline	Set up Python	2025-09-20T00:08:13.8547023Z Successfully set up CPython (3.11.13)
+pipeline	Set up Python	2025-09-20T00:08:13.8548307Z ##[endgroup]
+pipeline	Install dependencies	﻿2025-09-20T00:08:13.8667835Z ##[group]Run set -euo pipefail
+pipeline	Install dependencies	2025-09-20T00:08:13.8668490Z [36;1mset -euo pipefail[0m
+pipeline	Install dependencies	2025-09-20T00:08:13.8668835Z [36;1mpython -m pip install --upgrade pip[0m
+pipeline	Install dependencies	2025-09-20T00:08:13.8669239Z [36;1mpip install pandas numpy python-dateutil pytz[0m
+pipeline	Install dependencies	2025-09-20T00:08:13.9010808Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	Install dependencies	2025-09-20T00:08:13.9011459Z env:
+pipeline	Install dependencies	2025-09-20T00:08:13.9011776Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Install dependencies	2025-09-20T00:08:13.9012274Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	Install dependencies	2025-09-20T00:08:13.9012762Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Install dependencies	2025-09-20T00:08:13.9013235Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Install dependencies	2025-09-20T00:08:13.9013673Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Install dependencies	2025-09-20T00:08:13.9014123Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	Install dependencies	2025-09-20T00:08:13.9014515Z ##[endgroup]
+pipeline	Install dependencies	2025-09-20T00:08:17.9605363Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.13/x64/lib/python3.11/site-packages (25.2)
+pipeline	Install dependencies	2025-09-20T00:08:19.2476884Z Collecting pandas
+pipeline	Install dependencies	2025-09-20T00:08:19.3195290Z   Downloading pandas-2.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (91 kB)
+pipeline	Install dependencies	2025-09-20T00:08:19.5617243Z Collecting numpy
+pipeline	Install dependencies	2025-09-20T00:08:19.5785800Z   Downloading numpy-2.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+pipeline	Install dependencies	2025-09-20T00:08:19.6173790Z Collecting python-dateutil
+pipeline	Install dependencies	2025-09-20T00:08:19.6336147Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+pipeline	Install dependencies	2025-09-20T00:08:19.6838582Z Collecting pytz
+pipeline	Install dependencies	2025-09-20T00:08:19.7009135Z   Downloading pytz-2025.2-py2.py3-none-any.whl.metadata (22 kB)
+pipeline	Install dependencies	2025-09-20T00:08:19.7501278Z Collecting tzdata>=2022.7 (from pandas)
+pipeline	Install dependencies	2025-09-20T00:08:19.7662619Z   Downloading tzdata-2025.2-py2.py3-none-any.whl.metadata (1.4 kB)
+pipeline	Install dependencies	2025-09-20T00:08:19.7992823Z Collecting six>=1.5 (from python-dateutil)
+pipeline	Install dependencies	2025-09-20T00:08:19.8151861Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+pipeline	Install dependencies	2025-09-20T00:08:19.8352013Z Downloading pandas-2.3.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (12.4 MB)
+pipeline	Install dependencies	2025-09-20T00:08:19.9527840Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.4/12.4 MB 124.1 MB/s  0:00:00
+pipeline	Install dependencies	2025-09-20T00:08:19.9695919Z Downloading numpy-2.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)
+pipeline	Install dependencies	2025-09-20T00:08:20.1085505Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.9/16.9 MB 123.6 MB/s  0:00:00
+pipeline	Install dependencies	2025-09-20T00:08:20.1252636Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+pipeline	Install dependencies	2025-09-20T00:08:20.1451101Z Downloading pytz-2025.2-py2.py3-none-any.whl (509 kB)
+pipeline	Install dependencies	2025-09-20T00:08:20.1662882Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+pipeline	Install dependencies	2025-09-20T00:08:20.1845341Z Downloading tzdata-2025.2-py2.py3-none-any.whl (347 kB)
+pipeline	Install dependencies	2025-09-20T00:08:20.2974755Z Installing collected packages: pytz, tzdata, six, numpy, python-dateutil, pandas
+pipeline	Install dependencies	2025-09-20T00:08:26.4344482Z 
+pipeline	Install dependencies	2025-09-20T00:08:26.4355758Z Successfully installed numpy-2.3.3 pandas-2.3.2 python-dateutil-2.9.0.post0 pytz-2025.2 six-1.17.0 tzdata-2025.2
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	﻿2025-09-20T00:08:26.5115308Z ##[group]Run set -euo pipefail
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5115633Z [36;1mset -euo pipefail[0m
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5115878Z [36;1mmkdir -p sources/sheets/twitter[0m
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5116721Z [36;1mcurl -Lsf "https://docs.google.com/spreadsheets/d/e/2PACX-1vT39ngJbPzNRjcnKVG-Oehiy4qzyrghIvCI0FQbaBj2jc9LYGLbMUZaCQDGN8Ck_8Q465hqsR4AYz3k/pub?gid=77061416&single=true&output=csv" \[0m
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5117590Z [36;1m  > sources/sheets/twitter/tweets.csv[0m
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5118287Z [36;1mecho "[sheets] wrote $(wc -l < sources/sheets/twitter/tweets.csv) rows → sources/sheets/twitter/tweets.csv"[0m
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5148995Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5149304Z env:
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5149548Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5149945Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5150329Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5150709Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5151062Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5151412Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:26.5151884Z ##[endgroup]
+pipeline	Sheets → Twitter ingest (always-fresh Export → workspace)	2025-09-20T00:08:27.5425641Z [sheets] wrote 1805 rows → sources/sheets/twitter/tweets.csv
+pipeline	OCR Splits (images → staged)	﻿2025-09-20T00:08:27.5452078Z ##[group]Run set -euo pipefail
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5452394Z [36;1mset -euo pipefail[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5452635Z [36;1mmkdir -p audit_out[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5452858Z [36;1mif [ -d images ]; then[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5453401Z [36;1m  python scripts/splits_ocr.py --images images --out audit_out/splits_staged.csv || echo "[ocr] no rows or script exited non-zero"[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5453921Z [36;1melse[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5454203Z [36;1m  echo "[ocr] images/ not present; skipping"[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5454506Z [36;1m  : > audit_out/splits_staged.csv[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5454750Z [36;1mfi[0m
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5484646Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5545996Z env:
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5546280Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5546716Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5547132Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5547557Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5547972Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5548564Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.5548868Z ##[endgroup]
+pipeline	OCR Splits (images → staged)	2025-09-20T00:08:27.7269791Z [INFO] No OCR rows extracted.
+pipeline	Twitter text analysis (signals)	﻿2025-09-20T00:08:27.7351914Z ##[group]Run set -euo pipefail
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7352239Z [36;1mset -euo pipefail[0m
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7352474Z [36;1mmkdir -p audit_out[0m
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7352726Z [36;1mpython scripts/analyze_twitter_text.py \[0m
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7353064Z [36;1m  --csv sources/sheets/twitter/tweets.csv \[0m
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7353350Z [36;1m  --dict dictionaries \[0m
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7353615Z [36;1m  --out audit_out/twitter_text_signals.csv[0m
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7383502Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7383811Z env:
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7384046Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7384456Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7384857Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7385197Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7385550Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7385922Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:27.7386209Z ##[endgroup]
+pipeline	Twitter text analysis (signals)	2025-09-20T00:08:29.3544545Z Wrote: audit_out/twitter_text_signals.csv  rows=502  (HIGH=71, MED=15, LOW=416)
+pipeline	Normalize + merge sources	﻿2025-09-20T00:08:29.3979899Z ##[group]Run set -euo pipefail
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.3980216Z [36;1mset -euo pipefail[0m
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.3980440Z [36;1mmkdir -p audit_out[0m
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.3980700Z [36;1mpython scripts/normalize_and_merge.py \[0m
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.3981003Z [36;1m  --splits audit_out/splits_staged.csv \[0m
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.3981310Z [36;1m  --twitter audit_out/twitter_text_signals.csv \[0m
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.3981610Z [36;1m  --out audit_out/boardroom_inputs.csv[0m
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4012162Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4012474Z env:
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4012713Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4013110Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4013494Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4013834Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4014180Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4014566Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.4015017Z ##[endgroup]
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7167948Z [ok] splits rows: 108  twitter rows: 502  teams with weight: 85
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7169173Z [ok] wrote: /home/runner/work/splits-feed/splits-feed/audit_out/boardroom_inputs.csv
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7169901Z [top twitter-weighted teams]
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7170382Z   Miami Dolphins                  28.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7170901Z   Buffalo Bills                   27.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7171441Z   Los Angeles Chargers            26.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7172006Z   Tampa Bay Buccaneers            18.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7172541Z   Houston Texans                  17.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7173066Z   Detroit Lions                   16.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7173533Z   Chicago Bears                   15.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7174071Z   Green Bay Packers               15.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7174576Z   Las Vegas Raiders               14.00
+pipeline	Normalize + merge sources	2025-09-20T00:08:29.7175140Z   New York Giants                 14.00
+pipeline	Promote staged → splits.csv (with fallback)	﻿2025-09-20T00:08:29.7681751Z ##[group]Run set -euo pipefail
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7682306Z [36;1mset -euo pipefail[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7682692Z [36;1mpython - <<'PY'[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7683079Z [36;1mimport os, sys, pandas as pd[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7683502Z [36;1m[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7683793Z [36;1mROOT = os.getcwd()[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7684227Z [36;1mAOUT = os.path.join(ROOT, "audit_out")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7684818Z [36;1mstaged = os.path.join(AOUT, "splits_staged.csv")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7685474Z [36;1mboard  = os.path.join(AOUT, "boardroom_inputs.csv")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7686087Z [36;1mOUT    = os.path.join(ROOT, "splits.csv")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7686561Z [36;1m[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7686892Z [36;1mdef exists_nonempty(p): [0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7687453Z [36;1m    return os.path.exists(p) and os.path.getsize(p) > 0[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7688002Z [36;1m[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7688538Z [36;1mdef promote_from_df(df):[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7689334Z [36;1m    need = {"timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"}[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7690227Z [36;1m    if not need.issubset(df.columns):[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7690734Z [36;1m        # best-effort column mapping[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7691264Z [36;1m        if {"team_a","team_b"}.issubset(df.columns):[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7691916Z [36;1m            df = df.rename(columns={"team_a":"away_team","team_b":"home_team"})[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7693080Z [36;1m    for col in ["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"]:[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7693902Z [36;1m        if col not in df.columns:[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7694345Z [36;1m            df[col] = ""[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7694752Z [36;1m    df = df.fillna("")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7695268Z [36;1m    df = df[(df["away_team"].str.len()>1) & (df["home_team"].str.len()>1)][0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7695835Z [36;1m    if df.empty: [0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7696200Z [36;1m        return None[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7696947Z [36;1m    return df[["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"]][0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7697730Z [36;1m[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7698018Z [36;1m# 1) staged[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7698572Z [36;1mif exists_nonempty(staged):[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7699072Z [36;1m    ds = pd.read_csv(staged, dtype=str).fillna("")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7699573Z [36;1m    out = promote_from_df(ds)[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7700003Z [36;1m    if out is not None and len(out):[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7700456Z [36;1m        out.to_csv(OUT, index=False)[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7700971Z [36;1m        print(f"PROMOTE_OK (staged) rows: {len(out)}")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7701480Z [36;1m        sys.exit(0)[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7701834Z [36;1m    else:[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7702265Z [36;1m        print("staged present but no valid rows; falling back")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7702800Z [36;1m[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7703368Z [36;1m# 2) fallback boardroom_inputs[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7703824Z [36;1mif exists_nonempty(board):[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7704296Z [36;1m    db = pd.read_csv(board, dtype=str).fillna("")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7704798Z [36;1m    out = promote_from_df(db)[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7705249Z [36;1m    if out is not None and len(out):[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7705767Z [36;1m        out.to_csv(OUT, index=False)[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7706302Z [36;1m        print(f"PROMOTE_OK (fallback) rows: {len(out)}")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7706800Z [36;1m        sys.exit(0)[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7707151Z [36;1m[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7707494Z [36;1mprint("nothing promotable (no valid rows)")[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7707976Z [36;1mPY[0m
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7740228Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7740540Z env:
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7740781Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7741179Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7741772Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7742119Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7742465Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7742815Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:29.7743100Z ##[endgroup]
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:30.0819769Z staged present but no valid rows; falling back
+pipeline	Promote staged → splits.csv (with fallback)	2025-09-20T00:08:30.0820264Z PROMOTE_OK (fallback) rows: 108
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	﻿2025-09-20T00:08:30.1260462Z ##[group]Run set -euo pipefail
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1260779Z [36;1mset -euo pipefail[0m
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1261049Z [36;1mif [ -f scripts/live_delta_analysis.py ]; then[0m
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1261493Z [36;1m  python scripts/live_delta_analysis.py || echo "[live-delta] script returned non-zero"[0m
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1261885Z [36;1melse[0m
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1262189Z [36;1m  echo "[live-delta] scripts/live_delta_analysis.py not found; skipping"[0m
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1262549Z [36;1mfi[0m
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1292610Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1292943Z env:
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1293187Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1293605Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1293993Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1294366Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1294727Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1295113Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.1295405Z ##[endgroup]
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.4710833Z [live-delta] wrote snapshots → /home/runner/work/splits-feed/splits-feed/reports/2025-09-20/game_snapshots.csv
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.4712532Z [live-delta] wrote latest → /home/runner/work/splits-feed/splits-feed/reports/2025-09-20/analysis_latest.md
+pipeline	Live delta analysis (rolling; stop 15m pre-start)	2025-09-20T00:08:30.4713993Z [live-delta] wrote timeline → /home/runner/work/splits-feed/splits-feed/reports/2025-09-20/analysis_timeline.md
+pipeline	Commit outputs	﻿2025-09-20T00:08:30.5151570Z ##[group]Run set -euo pipefail
+pipeline	Commit outputs	2025-09-20T00:08:30.5151895Z [36;1mset -euo pipefail[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5152140Z [36;1mgit config user.name  "splits-bot"[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5152486Z [36;1mgit config user.email "actions@users.noreply.github.com"[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5152790Z [36;1m[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5153009Z [36;1m# Stage everything the pipeline may update[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5153329Z [36;1mgit add sources/sheets/twitter/tweets.csv || true[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5153760Z [36;1mgit add audit_out/twitter_text_signals.csv audit_out/boardroom_inputs.csv || true[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5154154Z [36;1mgit add splits.csv || true[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5154431Z [36;1mtest -d reports && git add -A reports || true[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5154694Z [36;1m[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5155038Z [36;1m# If nothing staged, exit quietly[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5155306Z [36;1mif git diff --cached --quiet; then[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5155553Z [36;1m  echo "no changes"[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5155788Z [36;1m  exit 0[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5155963Z [36;1mfi[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5156116Z [36;1m[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5156342Z [36;1m# Rebase before push to dodge non-fast-forward[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5156616Z [36;1mgit fetch origin[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5156976Z [36;1mgit pull --rebase origin main || git rebase --strategy-option=theirs origin/main || true[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5157356Z [36;1m[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5157600Z [36;1mgit commit -m "ci: refresh + promote + live-delta (auto)" || true[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5157994Z [36;1mgit push || echo "[push] remote moved; will land next cycle"[0m
+pipeline	Commit outputs	2025-09-20T00:08:30.5188480Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+pipeline	Commit outputs	2025-09-20T00:08:30.5188795Z env:
+pipeline	Commit outputs	2025-09-20T00:08:30.5189039Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Commit outputs	2025-09-20T00:08:30.5189453Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib/pkgconfig
+pipeline	Commit outputs	2025-09-20T00:08:30.5189836Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Commit outputs	2025-09-20T00:08:30.5190208Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Commit outputs	2025-09-20T00:08:30.5190549Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.13/x64
+pipeline	Commit outputs	2025-09-20T00:08:30.5190921Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.13/x64/lib
+pipeline	Commit outputs	2025-09-20T00:08:30.5191218Z   GIT_AUTHOR_NAME: splits-bot
+pipeline	Commit outputs	2025-09-20T00:08:30.5191480Z   GIT_AUTHOR_EMAIL: actions@users.noreply.github.com
+pipeline	Commit outputs	2025-09-20T00:08:30.5191763Z   GIT_COMMITTER_NAME: splits-bot
+pipeline	Commit outputs	2025-09-20T00:08:30.5192027Z   GIT_COMMITTER_EMAIL: actions@users.noreply.github.com
+pipeline	Commit outputs	2025-09-20T00:08:30.5192308Z ##[endgroup]
+pipeline	Commit outputs	2025-09-20T00:08:30.7207066Z no changes
+pipeline	Post Set up Python	﻿2025-09-20T00:08:30.7295311Z Post job cleanup.
+pipeline	Post Checkout	﻿2025-09-20T00:08:30.8913471Z Post job cleanup.
+pipeline	Post Checkout	2025-09-20T00:08:30.9836625Z [command]/usr/bin/git version
+pipeline	Post Checkout	2025-09-20T00:08:30.9872400Z git version 2.51.0
+pipeline	Post Checkout	2025-09-20T00:08:30.9914799Z Temporarily overriding HOME='/home/runner/work/_temp/a80447ec-137b-4255-8fc2-ff24870d33a6' before making global git config changes
+pipeline	Post Checkout	2025-09-20T00:08:30.9915958Z Adding repository directory to the temporary git global config as a safe directory
+pipeline	Post Checkout	2025-09-20T00:08:30.9920630Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/splits-feed/splits-feed
+pipeline	Post Checkout	2025-09-20T00:08:30.9954890Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+pipeline	Post Checkout	2025-09-20T00:08:30.9986097Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+pipeline	Post Checkout	2025-09-20T00:08:31.0270321Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+pipeline	Post Checkout	2025-09-20T00:08:31.0293244Z http.https://github.com/.extraheader
+pipeline	Post Checkout	2025-09-20T00:08:31.0310741Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+pipeline	Post Checkout	2025-09-20T00:08:31.0345387Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+pipeline	Complete job	﻿2025-09-20T00:08:31.0687811Z Cleaning up orphan processes

@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+import argparse, csv, hashlib, os, re, sys
+from datetime import datetime
+from dateutil import tz
+from PIL import Image, ImageOps
+import pytesseract
+import numpy as np
+import cv2
+import difflib
+
+# ---------- Schema ----------
+HEADER = [
+  "image_filename","image_sha256","image_bytes","image_mtime_utc",
+  "source","league","event_date","teams","market","side",
+  "handle_pct","bets_pct","odds","total_value","ticket_count","notes"
+]
+
+# ---------- Helpers ----------
+def infer_source(name:str)->str:
+    n = name.lower()
+    for k in ["vsinlive","betmgm","betmgmnews","actionnetworkhq","covers","pregame","sbr","espn","draftkings","dk","fanduel"]:
+        if n.startswith(k+"_") or n.startswith(k+"-"):
+            return k
+    if n.startswith("img_") or n.startswith("screenshot"):
+        return "camera"
+    return "unknown"
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path,"rb") as f:
+        for chunk in iter(lambda: f.read(1<<20), b""):
+            h.update(chunk)
+    return h.hexdigest(), os.path.getsize(path)
+
+def load_cv_gray(path):
+    im = Image.open(path).convert("RGB")
+    im = ImageOps.exif_transpose(im)
+    arr = np.array(im)
+    g = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
+    g = cv2.medianBlur(g, 3)
+    _, th = cv2.threshold(g, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    return th
+
+# ---------- Generic extractors ----------
+PCT = re.compile(r'(?<!\d)(\d{1,3})\s*%')
+ODDS = re.compile(r'([+-]\d{2,4})')
+TOTAL = re.compile(r'\b(?:[uo]|o/u|total|tot)\s*[:\-]?\s*([0-9]{1,2}(?:\.[05])?)', re.I)
+TEAMS_PAT = re.compile(r'([A-Z][A-Za-z\.\s]{2,20})\s*(?:@|vs\.?|v)\s*([A-Z][A-Za-z\.\s]{2,20})')
+
+def extract_fields_generic(t:str):
+    txt = t.replace('\n',' ').replace('\r',' ')
+    handle = bets = None
+    if "handle" in txt.lower():
+        h_idx = txt.lower().find("handle")
+        after = PCT.findall(txt[h_idx:h_idx+60]) if h_idx>-1 else []
+        if after: handle = int(after[0])
+    if "bets" in txt.lower():
+        b_idx = txt.lower().find("bets")
+        after = PCT.findall(txt[b_idx:b_idx+60]) if b_idx>-1 else []
+        if after: bets = int(after[0])
+    if handle is None or bets is None:
+        uniq = sorted({int(x) for x in PCT.findall(txt) if 0 <= int(x) <= 100}, reverse=True)
+        if uniq:
+            if handle is None: handle = uniq[0]
+            if bets is None:
+                for y in uniq:
+                    if y != handle: bets = y; break
+                if bets is None: bets = handle
+
+    odds = None
+    m = ODDS.findall(txt)
+    if m: odds = m[0]
+
+    total_value = None
+    mt = TOTAL.search(txt)
+    if mt: total_value = mt.group(1)
+
+    teams = None
+    tvs = TEAMS_PAT.search(txt)
+    if tvs:
+        a = tvs.group(1).strip()
+        b = tvs.group(2).strip()
+        teams = f"{a} @ {b}"
+
+    return handle, bets, odds, total_value, teams
+
+# ---------- Source-specific parsers ----------
+def parse_actionnetwork(text:str):
+    # Typical lines contain "Handle 72%" and "Bets 63%" and moneyline like +120
+    h = re.search(r'Handle\s+(\d{1,3})%', text, re.I)
+    b = re.search(r'Bets\s+(\d{1,3})%', text, re.I)
+    o = re.search(r'([+-]\d{2,4})', text)
+    t = re.search(r'(?:Total|O/U|OU)\s*[:\-]?\s*([0-9]{1,2}(?:\.[05])?)', text, re.I)
+    return (int(h.group(1)) if h else None,
+            int(b.group(1)) if b else None,
+            o.group(1) if o else None,
+            t.group(1) if t else None)
+
+def parse_betmgm(text:str):
+    # MGM posts often show "BETS xx%" and "HANDLE xx%" and totals as e.g. 7.5
+    h = re.search(r'Handle\s*[:\-]?\s*(\d{1,3})%', text, re.I)
+    b = re.search(r'Bets\s*[:\-]?\s*(\d{1,3})%', text, re.I)
+    o = re.search(r'([+-]\d{2,4})', text)
+    t = re.search(r'(?:Total|O/U|OU)\s*[:\-]?\s*([0-9]{1,2}(?:\.[05])?)', text, re.I)
+    return (int(h.group(1)) if h else None,
+            int(b.group(1)) if b else None,
+            o.group(1) if o else None,
+            t.group(1) if t else None)
+
+def parse_vsin(text:str):
+    # VSiN graphics often show both %s; fall back to top two % values
+    h = re.search(r'Handle\s+(\d{1,3})%', text, re.I)
+    b = re.search(r'Bets\s+(\d{1,3})%', text, re.I)
+    o = re.search(r'([+-]\d{2,4})', text)
+    t = re.search(r'(?:Total|O/U|OU)\s*[:\-]?\s*([0-9]{1,2}(?:\.[05])?)', text, re.I)
+    if not (h and b):
+        # fallback to generic pct harvesting if labels missing
+        hh, bb, oo, tt, _ = extract_fields_generic(text)
+        if h is None: h = re.match(r'.*', '')  # dummy
+        if b is None: b = re.match(r'.*', '')  # dummy
+        return hh, bb, oo or (o.group(1) if o else None), tt or (t.group(1) if t else None)
+    return (int(h.group(1)) if h else None,
+            int(b.group(1)) if b else None,
+            o.group(1) if o else None,
+            t.group(1) if t else None)
+
+# ---------- Team typo fixer (very light) ----------
+TEAM_FIX = {
+  "Los Angetes": "Los Angeles",
+  "Handte": "Handle",  # OCR glitch nearby teams text
+  "Bets RL Handle Bets": "Bets / Handle",  # clean noise
+}
+def clean_teams(text:str)->str:
+    if not text: return text
+    s = text
+    for k,v in TEAM_FIX.items():
+        s = s.replace(k, v)
+    # super light common fixes
+    s = s.replace("  ", " ").replace(" ,", ",")
+    return s
+
+# ---------- Main ----------
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--images", required=True)
+    ap.add_argument("--out", required=True)
+    args = ap.parse_args()
+
+    img_dir = args.images
+    out_csv = args.out
+    rejects_csv = os.path.splitext(out_csv)[0] + "_rejects.csv"
+
+    # Gather images
+    exts = {".png",".jpg",".jpeg",".webp",".jfif",".bmp"}
+    images = []
+    for root, _, files in os.walk(img_dir):
+        for f in files:
+            if os.path.splitext(f)[1].lower() in exts:
+                images.append(os.path.join(root,f))
+    images.sort(key=lambda p: os.path.getmtime(p))
+
+    tz_utc = tz.tzutc()
+    ok = 0
+    bad = 0
+
+    with open(out_csv,"w",newline="",encoding="utf-8") as fo, \
+         open(rejects_csv,"w",newline="",encoding="utf-8") as fr:
+        w = csv.DictWriter(fo, fieldnames=HEADER)
+        r = csv.DictWriter(fr, fieldnames=HEADER + ["reject_reason"])
+        w.writeheader()
+        r.writeheader()
+
+        for path in images:
+            name = os.path.basename(path)
+            source = infer_source(name)
+            sha, size = sha256_file(path)
+            mtime = datetime.utcfromtimestamp(os.path.getmtime(path)).replace(tzinfo=tz_utc).isoformat()
+
+            try:
+                th = load_cv_gray(path)
+                text = pytesseract.image_to_string(th, config="--psm 6")
+
+                # Branch by source
+                handle = bets = odds = total_value = None
+                teams = None
+                if source == "actionnetworkhq":
+                    handle, bets, odds, total_value = parse_actionnetwork(text)
+                elif source in ("betmgm","betmgmnews"):
+                    handle, bets, odds, total_value = parse_betmgm(text)
+                elif source == "vsinlive":
+                    handle, bets, odds, total_value = parse_vsin(text)
+                else:
+                    handle, bets, odds, total_value, teams = extract_fields_generic(text)
+
+                # Teams cleanup (if we got any)
+                teams = clean_teams(teams or "")
+
+                row = dict.fromkeys(HEADER, "")
+                row.update({
+                    "image_filename": name,
+                    "image_sha256": sha,
+                    "image_bytes": size,
+                    "image_mtime_utc": mtime,
+                    "source": source,
+                    "league": "",
+                    "event_date": "",
+                    "teams": teams,
+                    "market": "consensus",
+                    "side": "",
+                    "handle_pct": handle if handle is not None else "",
+                    "bets_pct": bets if bets is not None else "",
+                    "odds": odds or "",
+                    "total_value": total_value or "",
+                    "ticket_count": "",
+                    "notes": ""
+                })
+
+                has_signal = any([row["handle_pct"]!="", row["bets_pct"]!="", row["odds"]!="", row["total_value"]!=""])
+                if has_signal:
+                    # clamp 0..100
+                    for k in ("handle_pct","bets_pct"):
+                        v = str(row[k]).strip()
+                        if v and v.lstrip("-").isdigit():
+                            n = int(v)
+                            row[k] = str(n) if 0 <= n <= 100 else ""
+                    # normalize odds like "-120," -> "-120"
+                    row["odds"] = row["odds"].rstrip(",")
+                    w.writerow(row); ok += 1
+                else:
+                    row["reject_reason"] = "no_signal_fields"
+                    r.writerow(row); bad += 1
+
+            except Exception as e:
+                row = dict.fromkeys(HEADER, "")
+                row.update({
+                    "image_filename": name,
+                    "image_sha256": sha,
+                    "image_bytes": size,
+                    "image_mtime_utc": mtime,
+                    "source": source,
+                })
+                row["reject_reason"] = f"exception:{type(e).__name__}"
+                r.writerow(row); bad += 1
+
+    print(f"Done. Accepted rows: {ok}, Rejected rows: {bad}")
+    print(f"Wrote: {out_csv}")
+    print(f"Rejects: {rejects_csv}")
+
+if __name__ == "__main__":
+    main()

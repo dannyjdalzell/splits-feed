@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+import argparse, csv, hashlib, os, re
+from datetime import datetime
+from dateutil import tz
+from PIL import Image, ImageOps
+import pytesseract
+import numpy as np
+import cv2
+
+# ---------- Schema (unchanged) ----------
+HEADER = [
+  "image_filename","image_sha256","image_bytes","image_mtime_utc",
+  "source","league","event_date","teams","market","side",
+  "handle_pct","bets_pct","odds","total_value","ticket_count","notes"
+]
+
+# ---------- Helpers ----------
+def infer_source(name:str)->str:
+    n = name.lower()
+    for k in ["vsinlive","betmgm","betmgmnews","actionnetworkhq","covers","pregame","sbr","espn","draftkings","dk","fanduel"]:
+        if n.startswith(k+"_") or n.startswith(k+"-"):
+            return k
+    if n.startswith("img_") or n.startswith("screenshot"):
+        return "camera"
+    return "unknown"
+
+def sha256_file(path):
+    h = hashlib.sha256()
+    with open(path,"rb") as f:
+        for chunk in iter(lambda: f.read(1<<20), b""):
+            h.update(chunk)
+    return h.hexdigest(), os.path.getsize(path)
+
+def load_cv_gray(path):
+    im = Image.open(path).convert("RGB")
+    im = ImageOps.exif_transpose(im)
+    arr = np.array(im)
+    g = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
+    g = cv2.medianBlur(g, 3)
+    _, th = cv2.threshold(g, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    return th
+
+def ocr_text_best(path):
+    """Two-pass OCR: OTSU then adaptive; return the longer text."""
+    th1 = load_cv_gray(path)
+    txt1 = pytesseract.image_to_string(th1, config="--psm 6")
+    # adaptive threshold as fallback
+    im = Image.open(path).convert("L")
+    arr = np.array(ImageOps.exif_transpose(im))
+    th2 = cv2.adaptiveThreshold(arr,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,35,11)
+    txt2 = pytesseract.image_to_string(th2, config="--psm 6")
+    return txt2 if len(txt2) > len(txt1) else txt1
+
+# ---------- Patterns ----------
+PCT   = re.compile(r'(?<!\d)(\d{1,3})\s*%')
+ODDS  = re.compile(r'([+-]\d{2,4})')
+TOTAL = re.compile(r'(?:O/U|Total|OU)\s*[:\-]?\s*([0-9]{1,2}(?:\.[05])?)', re.I)
+TEAMS = re.compile(r'([A-Z][A-Za-z\.\s]{2,20})\s*(?:@|vs\.?|v)\s*([A-Z][A-Za-z\.\s]{2,20})')
+
+# ---------- Team autocorrect ----------
+TEAM_FIX = {
+  "Angetes":"Angeles","Dodqers":"Dodgers","Chisox":"White Sox","St Lous":"St Louis",
+  "Veges":"Vegas","New Yark":"New York","San Fransisco":"San Francisco","Phillv":"Philly",
+}
+def clean_teams(text:str)->str:
+    if not text: return text
+    for k,v in TEAM_FIX.items():
+        text = text.replace(k,v)
+    return " ".join(text.split()).replace(" ,", ",")
+
+# ---------- Source-aware parsers (kept) ----------
+def parse_actionnetwork(t): 
+    h=re.search(r'Handle\s*[:\-]?\s*(\d{1,3})%',t,re.I)
+    b=re.search(r'Bets\s*[:\-]?\s*(\d{1,3})%',t,re.I)
+    o=ODDS.search(t); x=TOTAL.search(t)
+    return (gi(h), gi(b), go(o), gv(x)), "actionnetwork"
+
+def parse_betmgm(t): 
+    h=re.search(r'Handle\s*[:\-]?\s*(\d{1,3})%',t,re.I)
+    b=re.search(r'Bets\s*[:\-]?\s*(\d{1,3})%',t,re.I)
+    o=ODDS.search(t); x=TOTAL.search(t)
+    return (gi(h), gi(b), go(o), gv(x)), "betmgm"
+
+def parse_vsin(t):
+    return greedy_extract(t), "vsin"
+
+def parse_pregame(t):
+    h=re.search(r'Cash\s*[:\-]?\s*(\d{1,3})%',t,re.I)
+    b=re.search(r'Ticket[s]?\s*[:\-]?\s*(\d{1,3})%',t,re.I)
+    o=ODDS.search(t); x=TOTAL.search(t)
+    return (gi(h), gi(b), go(o), gv(x)), "pregame"
+
+def parse_covers(t):
+    p=re.search(r'(\d{1,3})\s*%',t)
+    return ((int(p.group(1)) if p else None), None, None, None), "covers"
+
+# ---------- Greedy raw parceler ----------
+def greedy_extract(t:str):
+    txt = t.replace("\n"," ")
+    # percents
+    vals = [int(x) for x in PCT.findall(txt) if 0 <= int(x) <= 100]
+    vals = sorted(set(vals), reverse=True)
+    handle = vals[0] if len(vals)>=1 else None
+    bets   = vals[1] if len(vals)>=2 else None
+    # odds / totals
+    odds = (ODDS.findall(txt) or [None])[0]
+    tot  = (TOTAL.findall(txt) or [None])[0]
+    return handle, bets, odds, tot
+
+def gi(m): return int(m.group(1)) if m else None
+def go(m): return m.group(1) if m else None
+def gv(m): return m.group(1) if m else None
+
+# ---------- Teams ----------
+def extract_teams(t:str):
+    m = TEAMS.search(t.replace("\n"," "))
+    if not m: return ""
+    return clean_teams(f"{m.group(1).strip()} @ {m.group(2).strip()}")
+
+# ---------- Main ----------
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--images", required=True)
+    ap.add_argument("--out", required=True)
+    args = ap.parse_args()
+
+    img_dir, out_csv = args.images, args.out
+    rejects_csv = os.path.splitext(out_csv)[0] + "_rejects.csv"
+
+    exts = {".png",".jpg",".jpeg",".webp",".jfif",".bmp"}
+    images = [os.path.join(r,f) for r,_,fs in os.walk(img_dir) for f in fs if os.path.splitext(f)[1].lower() in exts]
+    images.sort(key=lambda p: os.path.getmtime(p))
+
+    tz_utc = tz.tzutc()
+    ok = bad = 0
+
+    with open(out_csv,"w",newline="",encoding="utf-8") as fo, \
+         open(rejects_csv,"w",newline="",encoding="utf-8") as fr:
+        w = csv.DictWriter(fo, fieldnames=HEADER); w.writeheader()
+        rj = csv.DictWriter(fr, fieldnames=HEADER+["reject_reason"]); rj.writeheader()
+
+        for path in images:
+            name   = os.path.basename(path)
+            source = infer_source(name)
+            sha, size = sha256_file(path)
+            mtime = datetime.utcfromtimestamp(os.path.getmtime(path)).replace(tzinfo=tz_utc).isoformat()
+            try:
+                text = ocr_text_best(path)
+                teams = extract_teams(text)
+
+                # 1) try source-specific; 2) fall back to greedy (RAW) always
+                parsed_by = None
+                handle=bets=odds=tot=None
+                if source == "actionnetworkhq":
+                    (handle,bets,odds,tot), parsed_by = parse_actionnetwork(text)
+                elif source in ("betmgm","betmgmnews"):
+                    (handle,bets,odds,tot), parsed_by = parse_betmgm(text)
+                elif source == "vsinlive":
+                    (handle,bets,odds,tot), parsed_by = parse_vsin(text)
+                elif source == "pregame":
+                    (handle,bets,odds,tot), parsed_by = parse_pregame(text)
+                elif source == "covers":
+                    (handle,bets,odds,tot), parsed_by = parse_covers(text)
+
+                # RAW parceler (always runs and can fill gaps)
+                gh, gb, go_, gt = greedy_extract(text)
+                if handle is None: handle = gh
+                if bets   is None: bets   = gb
+                if odds   is None: odds   = go_
+                if tot    is None: tot    = gt
+                if not parsed_by: parsed_by = "raw"
+
+                # normalize
+                for k,v in (("handle_pct",handle),("bets_pct",bets)):
+                    if isinstance(v,int) and (0<=v<=100):
+                        pass
+                    elif isinstance(v,int):
+                        if k=="handle_pct": handle=None
+                        else: bets=None
+                if isinstance(odds,str): odds = odds.rstrip(",")
+                teams = teams or ""
+
+                # accept if we have ANY signal
+                has_signal = any([isinstance(handle,int), isinstance(bets,int), bool(odds), bool(tot), bool(teams)])
+                row = {k:"" for k in HEADER}
+                row.update({
+                    "image_filename": name,
+                    "image_sha256": sha,
+                    "image_bytes": size,
+                    "image_mtime_utc": mtime,
+                    "source": source,
+                    "league": "",
+                    "event_date": "",
+                    "teams": teams,
+                    "market": "consensus",
+                    "side": "",
+                    "handle_pct": handle if isinstance(handle,int) else "",
+                    "bets_pct":   bets   if isinstance(bets,int) else "",
+                    "odds": odds or "",
+                    "total_value": tot or "",
+                    "ticket_count": "",
+                    "notes": f"parsed_by={parsed_by}"
+                })
+
+                if has_signal:
+                    w.writerow(row); ok += 1
+                else:
+                    row["reject_reason"] = "no_signal_fields"
+                    rj.writerow(row); bad += 1
+
+            except Exception as e:
+                row = {k:"" for k in HEADER}
+                row.update({
+                    "image_filename": name,
+                    "image_sha256": sha,
+                    "image_bytes": size,
+                    "image_mtime_utc": mtime,
+                    "source": source,
+                    "reject_reason": f"exception:{type(e).__name__}"
+                })
+                rj.writerow(row); bad += 1
+
+    print(f"Done. Accepted: {ok}, Rejected: {bad}")
+    print(f"Wrote: {out_csv} | Rejects at: {rejects_csv}")
+
+if __name__ == "__main__":
+    main()
