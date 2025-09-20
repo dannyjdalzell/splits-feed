@@ -1,0 +1,32 @@
+name: Boardroom Picks (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+      - name: Build boardroom picks
+        run: |
+          python scripts/boardroom_picks.py \
+            --signals "audit_out/twitter_text_signals.csv" \
+            --splits "splits.csv" \
+            --out-csv "boardroom/boardroom_picks.csv" \
+            --out-md  "boardroom/boardroom_picks.md"
+      - name: Commit boardroom outputs if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add boardroom/boardroom_picks.csv boardroom/boardroom_picks.md
+          if git diff --staged --quiet; then echo "No changes."; else git commit -m "Boardroom: update picks [skip ci]"; git push; fi
