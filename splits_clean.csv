@@ -1,1 +1,12 @@
-away_team,market,handle_pct,line,source,timestamp,home_team,tickets_pct,league
+timestamp,league,away_team,home_team,market,tickets_pct,handle_pct,line,source,source_file,sha256
+2025-09-20T22:09:20Z,NFL,MONEYLINE,1e Open Now bets Handle Open Now bets handle} Now __ hets_h,Spread,4,7,42.554,UNKNOWN,G00AhouXMAAkO2b.jpeg,22e8f9813e973cf5fad3e946192b9842dc80824794ae10f7ff8b2cf101c44148
+2025-09-20T22:09:22Z,Unknown,Nassourdine Imavov -105 +110 62% 639,Caio Borralho ~115 ~135 38% 379,Moneyline,71,24,7,UNKNOWN,G0Kg91GXkAAJVrq.jpeg,bf0a391d8ff5c16c23a234d2037995436890d6b6acc1cb62c09e7e2dc0db0207
+2025-09-20T22:09:26Z,Unknown,EEE EEE EEO ek ae,ja Intemational at 7425. 0425 428% 14% 0 0 76% 62%,Spread,42,49,270,UNKNOWN,G0Ki3Y-XYAA9Glw.jpeg,d5a059ba2c7eb9774251692a44f7e48c9b5eacf79c376a06774b1f86f5fabd95
+2025-09-20T22:09:29Z,NFL,Mpening LUPPene MpOCHING UTPOne MPCHING = SUPFOTIL,New OfleansSaints |] 44S 465 24% 15% PU 4B 10% O24,Moneyline,35,0,+105,UNKNOWN,G0PvfdFWQAAPNtz.jpeg,b6856700a64a12b6544116fb900860b8625dfba14c82269fe8974be95c69217b
+2025-09-20T22:09:33Z,NCAAF,— Spread = Odds Totat Odds ML Odds,"""Clemson at 6 3 62% 5% 10 55 9 is 52% 61% ~190 145 55%",Moneyline,50,34,56541,UNKNOWN,G0ugCmlWkAEOiWA.jpeg,49dcda3d1b55d2dd4974a5f4037d0b8ddc3ba3a9e1d0c0f41326b821041d011f
+2025-09-20T22:09:35Z,NBA,,,Spread,62,73,71,UNKNOWN,G1OauqgXYAAyuyS.jpeg,4d3610374bcf1b3f55a713ec59b2dbeb025b1464db83763a7672a990c06eb8de
+2025-09-20T22:09:37Z,MLB,,,Moneyline,13,82,120,UNKNOWN,G1PISHdWYAAuMbT.png,17e0981222a2f2d70740c12e6cdc564b9c4f893ec088c1f787787e4f4c52f1ca
+2025-09-20T22:09:41Z,NCAAF,=e Eee oF ~~ —~ —EeE—eeEeE———E—Ee—eEE,UAB at #38.5 +39.5 25% 34% 10 ie] 50% 65%,Spread,28,28,8,UNKNOWN,G1S98F9WQAA715I.png,d16913914272e771a1f3f666a9e54b6f5a6013b45b83f0e1facdf52faf3dfe83
+2025-09-20T22:09:46Z,Unknown,reba (as) Cae] Cer | as Cae Ce eee] Go,“9 Cas) Cae) Coe || ees Cee] Co Ces) Cae] Ce,Spread,60,39,6,UNKNOWN,G1TQDNHXEAAqYja.jpeg,69bd70665a646d3a17db9951c8f010a966f258b22af43c8ec6543ac0132fb67e
+2025-09-20T22:09:51Z,Unknown,jes Ot | ee eee OO | ES CN,are ot ee,Total,5,75,2,UNKNOWN,G1TQGKLW8AETJz3.png,054f48215179743a23afd822501aac43c3cf3a49657f25c41e216c62ae8a95d6
+2025-09-20T22:10:04Z,Unknown,Opening Current ° ° . Current Opening Current,Opening Total y y y y,Spread,76,72,2,UNKNOWN,GptzWT9WoAA5TP6.jpeg,b2797b94d28c7a5d6065cf698955d61551f9a64ea6cd50eba60295beeca47ee8

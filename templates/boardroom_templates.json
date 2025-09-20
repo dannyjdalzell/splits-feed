@@ -1,0 +1,560 @@
+{
+  "22e8f9813e973cf5fad3e946192b9842dc80824794ae10f7ff8b2cf101c44148": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "bf0a391d8ff5c16c23a234d2037995436890d6b6acc1cb62c09e7e2dc0db0207": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "d5a059ba2c7eb9774251692a44f7e48c9b5eacf79c376a06774b1f86f5fabd95": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "b6856700a64a12b6544116fb900860b8625dfba14c82269fe8974be95c69217b": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "49dcda3d1b55d2dd4974a5f4037d0b8ddc3ba3a9e1d0c0f41326b821041d011f": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "4d3610374bcf1b3f55a713ec59b2dbeb025b1464db83763a7672a990c06eb8de": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "17e0981222a2f2d70740c12e6cdc564b9c4f893ec088c1f787787e4f4c52f1ca": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "d16913914272e771a1f3f666a9e54b6f5a6013b45b83f0e1facdf52faf3dfe83": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "e6e1f6ad40e54c9abb91b6ab7c1cac3560077f7f5574deffcbbb006e6927a9d9": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "69bd70665a646d3a17db9951c8f010a966f258b22af43c8ec6543ac0132fb67e": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "a75e6a1b232dc6a9f372dc31ac02a3a20271d4789c1af15bafaadde5c12028ba": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "054f48215179743a23afd822501aac43c3cf3a49657f25c41e216c62ae8a95d6": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "3176f87ae77fcabff09f2b44bdf180e30bae3393777ff22a020a497c95a517e5": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "6f108a1e2c0b90a9c9f271fc965d262e3bf8bfb48dc8c3a36e233699a44f455a": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "049bce49e776802e460f2688eae5fcd510fd38b2473042bf005aded617ef6b43": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "03ffdaf4c0b417b7ca5f0be8c1dda0c80e2255c03783ca53eb5cf9cd57b910d8": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "465bf489de42782e268a1d574efe1cc4dc5dadeff46957a55e898b15a6a2af77": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "b2797b94d28c7a5d6065cf698955d61551f9a64ea6cd50eba60295beeca47ee8": {
+    "source": "UNKNOWN",
+    "width_hint": null,
+    "height_hint": null,
+    "rois": {
+      "TEAMS": [
+        0.05,
+        0.1,
+        0.95,
+        0.3
+      ],
+      "PCTS": [
+        0.06,
+        0.32,
+        0.94,
+        0.56
+      ],
+      "LINE": [
+        0.55,
+        0.56,
+        0.94,
+        0.76
+      ],
+      "META": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ]
+    }
+  }
+}
