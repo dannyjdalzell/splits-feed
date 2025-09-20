@@ -1,94 +1,47 @@
 #!/usr/bin/env python3
-import json, re, sys, argparse
-from datetime import datetime
+import re, sys, argparse
+from datetime import datetime, timezone
 import pandas as pd
 
+# OCR garbage phrases we always drop
 BAD_PATTERNS = [
     r"Estimating resolution",
     r"Betting Splits Expanded Splits",
     r"Handle Bets Total Handle Bets",
     r"Money dle Bets",
-    r"Spread\s*$",  # as a team name
-    r"MLB - [A-Za-z]{3,9},?Sep",  # calendar garbage
-    r"Chiefs ad",  # OCR ad tails
+    r"\bChiefs ad\b",
 ]
 
 MARKETS = {"Spread","ML","Moneyline","Total","O/U","OU"}
 
-def _norm(s:str)->str:
-    s = re.sub(r"[^A-Za-z0-9& +./'-]", " ", str(s or ""))
+def norm(s:str)->str:
+    s = re.sub(r"[^A-Za-z0-9&@ +./'-]", " ", str(s or ""))
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
-def load_aliases(path:str):
-    """
-    Accepts multiple shapes:
-    - list of {abr/abbrev, city, name, mascot}
-    - nested dicts like conferences → schools → {abbrev, mascot}
-    - {"aliases": {"KC":["KC","Kansas City","Chiefs",...] , ...}}
-    Returns: alias_map (lower alias -> CANON), league_map (CANON -> league guess)
-    """
-    raw = json.load(open(path, "r", encoding="utf-8"))
-    alias_map = {}
-    league_map = {}
-    def add(team, canon, league=None):
-        t = _norm(team).lower()
-        if not t: return
-        alias_map[t] = canon
-        if league: league_map[canon]=league
+def clean_team(s:str)->str:
+    """Heuristics only; no dictionary."""
+    s = norm(s)
+    # strip common OCR tails
+    s = re.sub(r"MLB - .*", "", s).strip()
+    s = re.sub(r"\bSPORTSBOOK\b.*", "", s).strip()
+    s = re.sub(r"\bEF\b.*", "", s).strip()
+    s = re.sub(r"^\brs\b\s*", "", s)   # 'rs Los Angeles Chargers' → 'Los Angeles Chargers'
+    s = re.sub(r"^\bs\b\s*", "", s)    # 's Total Bets' → 'Total Bets' (will be dropped later)
+    # keep letters, spaces & a few symbols
+    s = re.sub(r"[^A-Za-z0-9& +./'-]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 
-    def add_pack(city=None,name=None,abr=None,abbrev=None,mascot=None,league=None):
-        parts = []
-        if city: parts.append(city)
-        if name: parts.append(name)
-        city_name = " ".join(parts)
-        canon = _norm((abr or abbrev or city_name or mascot or "")).upper() or _norm(city_name).upper()
-        for a in filter(None,[abr,abbrev,city,name,mascot,city_name,
-                              (city or "")+" "+(mascot or ""),
-                              (city or "")+" "+(name or "")]):
-            add(a, canon, league)
-
-    if isinstance(raw, dict) and "aliases" in raw:
-        for canon, arr in raw["aliases"].items():
-            for a in arr: add(a, canon, None)
-    elif isinstance(raw, dict):
-        # treat nested conferences/leagues
-        for maybe_league, teams in raw.items():
-            if isinstance(teams, dict):
-                for team, meta in teams.items():
-                    if isinstance(meta, dict):
-                        add_pack(city=team, name=meta.get("name"), abr=meta.get("abr") or meta.get("abbrev"),
-                                 mascot=meta.get("mascot"), league=maybe_league)
-                    else:
-                        add_pack(city=team, league=maybe_league)
-    elif isinstance(raw, list):
-        for meta in raw:
-            if isinstance(meta, dict):
-                add_pack(city=meta.get("city"), name=meta.get("name"),
-                         abr=meta.get("abr") or meta.get("abbrev"), mascot=meta.get("mascot"),
-                         league=meta.get("league") or meta.get("conf"))
-    return alias_map, league_map
-
-def resolve_team(txt:str, alias_map:dict):
-    s = _norm(txt).lower()
-    if not s: return None
-    # Exact
-    if s in alias_map: return alias_map[s]
-    # Suffix (cropped left by OCR, e.g. "rs Los Angeles Chargers")
-    for alias in alias_map.keys():
-        if s.endswith(alias): return alias_map[alias]
-    # Substring
-    for alias in alias_map.keys():
-        if f" {alias} " in f" {s} ":
-            return alias_map[alias]
-    return None
-
-def looks_bad_team(s:str)->bool:
-    s = _norm(s)
+def bad_team(s:str)->bool:
+    s = s or ""
+    if not s: return True
     for pat in BAD_PATTERNS:
         if re.search(pat, s, flags=re.I): return True
-    # Heuristic: teams should have at least 2 letters and not be generic words
-    if len(re.sub(r"[^A-Za-z]", "", s)) < 3: return True
+    # too short or generic
+    letters = re.sub(r"[^A-Za-z]", "", s)
+    if len(letters) < 3: return True
+    if s.lower() in {"spread","ml","total","o/u","ou","fu"}: return True
     return False
 
 def coerce_pct(x):
@@ -100,77 +53,81 @@ def coerce_pct(x):
     except: pass
     return None
 
-def parse_args():
+def to_ts(x):
+    try:
+        return pd.to_datetime(x, utc=True)
+    except:
+        return pd.NaT
+
+def game_key(a:str, b:str)->str:
+    a, b = norm(a).upper(), norm(b).upper()
+    if a <= b: 
+        return f"{a}|{b}"
+    return f"{b}|{a}"
+
+def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--in", dest="src", default="splits.csv")
     ap.add_argument("--out", dest="out", default="splits_clean.csv")
-    ap.add_argument("--teams", dest="teams", default="scripts/team_dictionary.json")
-    ap.add_argument("--promote", action="store_true", help="also overwrite splits.csv with the clean file")
-    return ap.parse_args()
+    ap.add_argument("--promote", action="store_true")
+    args = ap.parse_args()
 
-def main():
-    args = parse_args()
     try:
         df = pd.read_csv(args.src)
     except FileNotFoundError:
-        print(f"[guard] no input {args.src}; exiting cleanly.")
+        print(f"[guard] no input {args.src}; exiting.")
         sys.exit(0)
 
-    alias_map, league_map = load_aliases(args.teams)
+    orig = len(df)
+    # normalize headers
+    df = df.rename(columns={c: norm(c).lower().replace(" ","_") for c in df.columns})
 
-    N0 = len(df)
-    df = df.rename(columns={c:_norm(c).lower().replace(" ","_") for c in df.columns})
-
-    # Basic required columns
-    need = {"timestamp","away_team","home_team","market","source"}
-    missing = need - set(df.columns)
-    if missing:
-        print(f"[guard] missing cols {missing}; exiting.")
+    need = {"timestamp","away_team","home_team","market"}
+    if not need.issubset(df.columns):
+        print(f"[guard] missing cols {need - set(df.columns)}; exiting.")
         sys.exit(0)
 
-    # Strip obvious garbage rows via patterns
-    mask_bad = False
+    # scrub
+    df["away_team"] = df["away_team"].map(clean_team)
+    df["home_team"] = df["home_team"].map(clean_team)
+
+    # drop obvious garbage by substring
+    bad_mask = False
     for col in ["away_team","home_team"]:
-        bad_here = df[col].astype(str).fillna("").str.contains("|".join(BAD_PATTERNS), case=False, regex=True)
-        mask_bad = bad_here if mask_bad is False else (mask_bad | bad_here)
-    df = df[~mask_bad].copy()
+        m = df[col].astype(str).str.contains("|".join(BAD_PATTERNS), case=False, regex=True)
+        bad_mask = m if bad_mask is False else (bad_mask | m)
+    df = df[~bad_mask].copy()
 
-    # Normalize % and market
-    df["tickets_pct"] = df.get("tickets_pct")
-    df["handle_pct"]  = df.get("handle_pct")
-    df["tickets_pct"] = df["tickets_pct"].map(coerce_pct)
-    df["handle_pct"]  = df["handle_pct"].map(coerce_pct)
+    # coerce %
+    if "tickets_pct" in df.columns: df["tickets_pct"] = df["tickets_pct"].map(coerce_pct)
+    else: df["tickets_pct"] = None
+    if "handle_pct" in df.columns:  df["handle_pct"]  = df["handle_pct"].map(coerce_pct)
+    else: df["handle_pct"] = None
 
-    df["market"] = df["market"].astype(str).str.replace(r"Money Line","ML", regex=False)
-    df["market"] = df["market"].apply(lambda s: "ML" if s.strip().upper() in {"ML","MONEYLINE","MONEY LINE"} else s)
-    df["market"] = df["market"].apply(lambda s: "Total" if s.strip().lower() in {"total","o/u","ou"} else s)
-    df = df[df["market"].isin(list(MARKETS))]
+    # market normalize
+    df["market"] = df["market"].astype(str).str.strip()
+    df["market"] = df["market"].replace({"Moneyline":"ML","Money Line":"ML","O/U":"Total","OU":"Total"})
+    df = df[df["market"].isin(MARKETS)]
 
-    # Resolve teams
-    df["away"] = df["away_team"].apply(lambda s: resolve_team(s, alias_map))
-    df["home"] = df["home_team"].apply(lambda s: resolve_team(s, alias_map))
-    # Drop obvious bad team strings
-    bad_rows = df["away_team"].apply(looks_bad_team) | df["home_team"].apply(looks_bad_team)
-    df = df[~bad_rows]
-    # Keep only rows with both sides resolved and different
-    df = df[df["away"].notna() & df["home"].notna() & (df["away"]!=df["home"])].copy()
+    # drop rows with bad teams
+    good = (~df["away_team"].map(bad_team)) & (~df["home_team"].map(bad_team)) & (df["away_team"]!=df["home_team"])
+    df = df[good].copy()
 
-    # Clean timestamp parse
-    def to_ts(x):
-        try: return pd.to_datetime(x, utc=True)
-        except: return pd.NaT
+    # timestamp
     df["timestamp"] = df["timestamp"].map(to_ts)
     df = df[df["timestamp"].notna()]
 
-    # Arrange / minimal columns
-    keep_cols = ["timestamp","away","home","market","tickets_pct","handle_pct","line","source"]
-    for k in keep_cols:
+    # construct game key (order agnostic)
+    df["game_key"] = [game_key(a,b) for a,b in zip(df["away_team"], df["home_team"])]
+
+    # keep minimal useful columns
+    keep = ["timestamp","game_key","away_team","home_team","market","tickets_pct","handle_pct","line"]
+    for k in keep:
         if k not in df.columns: df[k] = None
-    df = df[keep_cols].sort_values("timestamp")
+    df = df[keep].sort_values("timestamp")
 
     df.to_csv(args.out, index=False)
-    print(f"[guard] input {N0} → kept {len(df)} rows; wrote {args.out}")
-
+    print(f"[guard] input {orig} → kept {len(df)}; wrote {args.out}")
     if args.promote:
         df.to_csv("splits.csv", index=False)
         print("[guard] promoted splits_clean.csv → splits.csv")
