@@ -1,34 +1,89 @@
-- name: Commit clean splits with rebase & retry
-  run: |
-    set -euo pipefail
-    git config user.name  "splits-bot"
-    git config user.email "bot@users.noreply.github.com"
+name: Splits Guard/Normalizer
 
-    BRANCH="${GITHUB_REF_NAME:-main}"
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
 
-    # Stage & commit if there are changes
-    git add splits.csv splits_clean.csv || true
-    if git diff --cached --quiet; then
-      echo "No changes to commit."
-      exit 0
-    fi
-    git commit -m "splits-guard: promote clean → splits.csv (no dictionary)" || true
+permissions:
+  contents: write
 
-    # Rebase + retry push (prefer ours for generated files)
-    for attempt in 1 2 3 4 5; do
-      if git push origin "HEAD:${BRANCH}"; then
-        echo "Pushed on attempt $attempt"
-        exit 0
-      fi
-      echo "Push failed (attempt $attempt). Rebasing onto origin/${BRANCH}…"
-      git fetch origin "${BRANCH}"
-      if ! git pull --rebase origin "${BRANCH}"; then
-        echo "Rebase conflict; preferring ours for generated artifacts."
-        git checkout --ours -- splits.csv splits_clean.csv || true
-        git add splits.csv splits_clean.csv || true
-        git rebase --continue || true
-      fi
-      sleep $((RANDOM%5+2))
-    done
-    echo "Failed to push after retries." >&2
-    exit 1
+concurrency:
+  group: splits-guard
+  cancel-in-progress: false
+
+jobs:
+  clean_and_promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+
+      - name: Clean splits (dictionary-less; safe fallback)
+        run: |
+          set -e
+          if [ ! -f splits.csv ]; then
+            echo "::warning::splits.csv missing; creating empty clean file."
+            : > splits_clean.csv
+          elif [ -f scripts/splits_guard_clean.py ]; then
+            python scripts/splits_guard_clean.py --in splits.csv --out splits_clean.csv
+          else
+            echo "::notice::scripts/splits_guard_clean.py missing; doing shallow clean."
+            awk -F',' 'NR==1 || ($3 !~ /Estimating resolution/ && $1 ~ /^20/)' splits.csv > splits_clean.csv || cp -f splits.csv splits_clean.csv
+          fi
+          ls -lh splits.csv splits_clean.csv || true
+          head -5 splits_clean.csv || true
+
+      - name: Promote clean → splits.csv
+        run: |
+          cp -f splits_clean.csv splits.csv || true
+
+      - name: Commit clean splits with rebase & retry
+        env:
+          BRANCH_REF: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git config user.name  "splits-bot"
+          git config user.email "bot@users.noreply.github.com"
+
+          BRANCH="${BRANCH_REF:-main}"
+
+          git add splits.csv splits_clean.csv || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "splits-guard: promote clean → splits.csv (no dictionary)" || true
+
+          for attempt in 1 2 3 4 5; do
+            if git push origin "HEAD:${BRANCH}"; then
+              echo "Pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "Push failed (attempt $attempt). Rebasing onto origin/${BRANCH}…"
+            git fetch origin "${BRANCH}"
+            git pull --rebase origin "${BRANCH}" || true
+            # Prefer this run’s generated artifacts if there’s a conflict
+            git checkout --ours -- splits.csv splits_clean.csv || true
+            git add splits.csv splits_clean.csv || true
+            git rebase --continue || true
+            sleep $((RANDOM%5+2))
+          done
+
+          echo "Failed to push after retries." >&2
+          exit 1
