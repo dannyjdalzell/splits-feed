@@ -1,0 +1,73 @@
+name: Boardroom LIVE (build + publish)
+on:
+  schedule: [{ cron: "*/15 * * * *" }]
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    env:
+      GIST_ID: "<PASTE_YOUR_GIST_ID>"
+      GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with: { fetch-depth: 0 }
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install pandas; fi
+
+      - name: Ensure folders
+        run: |
+          mkdir -p boardroom audit_out sources/sheets/twitter
+
+      - name: Build boardroom picks
+        run: |
+          if [ -s audit_out/twitter_text_signals.csv ] && [ -s splits.csv ]; then
+            python scripts/boardroom_picks.py \
+              --signals audit_out/twitter_text_signals.csv \
+              --splits splits.csv
+          else
+            echo "::warning::Missing signals or splits; skipping build."
+            : > boardroom/boardroom_picks.csv
+            : > boardroom/boardroom_picks.md
+          fi
+
+      - name: Commit artifacts if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add boardroom/boardroom_picks.csv boardroom/boardroom_picks.md || true
+          if git diff --staged --quiet; then echo "No boardroom changes."; else git commit -m "CI(Boardroom): update picks [skip ci]"; git push; fi
+
+      - name: Prepare Gist payload
+        run: |
+          python - <<'PY'
+          import json
+          def load(p):
+              try: return open(p,'r',encoding='utf-8',errors='replace').read()
+              except Exception: return ""
+          payload = {"files":{
+            "boardroom_picks.csv":{"content":load("boardroom/boardroom_picks.csv")},
+            "boardroom_picks.md":{"content":load("boardroom/boardroom_picks.md")},
+            "twitter_text_signals.csv":{"content":load("audit_out/twitter_text_signals.csv")},
+            "tweets.csv":{"content":load("sources/sheets/twitter/tweets.csv")},
+            "splits.csv":{"content":load("splits.csv")}
+          }}
+          open("gist_payload.json","w",encoding="utf-8").write(json.dumps(payload))
+          PY
+
+      - name: Publish to Gist
+        if: env.GIST_ID != '' && env.GIST_TOKEN != ''
+        run: |
+          curl -sS -X PATCH \
+            -H "Authorization: token ${GIST_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/gists/${GIST_ID} \
+            -d @gist_payload.json || true
