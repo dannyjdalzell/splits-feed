@@ -1,0 +1,105 @@
+name: Boardroom LIVE (tuneable)
+
+on:
+  workflow_dispatch:
+    inputs:
+      hours:        { description: "Lookback hours",  default: "72",  required: false }
+      min_signals:  { description: "Min signals",     default: "2",   required: false }
+      star5:        { description: "5★ threshold",    default: "6.0", required: false }
+      star4:        { description: "4★ threshold",    default: "3.5", required: false }
+
+jobs:
+  build-render-publish:
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    env:
+      GIST_ID:     ${{ secrets.GIST_ID }}
+      GIST_TOKEN:  ${{ secrets.GIST_TOKEN }}
+      HOURS:       ${{ inputs.hours }}
+      MIN_SIG:     ${{ inputs.min_signals }}
+      STAR5:       ${{ inputs.star5 }}
+      STAR4:       ${{ inputs.star4 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+
+      - name: Render Boardroom (deep analysis)
+        run: |
+          set -e
+          mkdir -p boardroom audit_out sources/sheets/twitter
+          python scripts/boardroom_render.py \
+            --picks_csv boardroom/boardroom_picks.csv \
+            --signals   audit_out/twitter_text_signals.csv \
+            --splits    splits.csv \
+            --teams     scripts/team_dictionary.json \
+            --hours     "${HOURS:-72}" \
+            --min_signals "${MIN_SIG:-2}" \
+            --star5     "${STAR5:-6.0}" \
+            --star4     "${STAR4:-3.5}"
+
+      - name: Debug top-25 (always produce for tuning)
+        run: |
+          python - <<'PY'
+          import os, pandas as pd
+          os.makedirs("boardroom", exist_ok=True)
+          try:
+              df = pd.read_csv("audit_out/twitter_text_signals.csv")
+              if "entity" not in df.columns: df["entity"] = ""
+              # Keep only non-empty entities for the debug rollup
+              ent = df["entity"].fillna("").astype(str)
+              top = (df[ent.ne("")]
+                     .groupby("entity", dropna=False)
+                     .size().reset_index(name="signals")
+                     .sort_values("signals", ascending=False)
+                     .head(25))
+              top.to_csv("boardroom/boardroom_top25.csv", index=False)
+              print("debug top25 rows:", len(top))
+          except Exception as e:
+              print("debug top25 skipped:", e)
+          PY
+
+      - name: Build Gist payload
+        run: |
+          python - <<'PY'
+          import json, os
+          files={}
+          def add(p, as_name=None):
+              if os.path.exists(p) and os.path.getsize(p)>0:
+                  with open(p,"r",encoding="utf-8",errors="ignore") as f:
+                      files[as_name or os.path.basename(p)] = {"content": f.read()}
+          add("boardroom/boardroom_picks.md")
+          add("boardroom/boardroom_picks.csv")
+          add("boardroom/boardroom_top25.csv")
+          add("audit_out/twitter_text_signals.csv")
+          add("sources/sheets/twitter/tweets.csv")
+          add("splits.csv")
+          open("gist_payload.json","w").write(json.dumps({"files": files}))
+          print("payload files:", ", ".join(sorted(files)))
+          PY
+
+      - name: Publish to Gist
+        run: |
+          set -euo pipefail
+          test -n "${GIST_ID:-}"     || { echo "GIST_ID secret missing"; exit 1; }
+          test -n "${GIST_TOKEN:-}"  || { echo "GIST_TOKEN secret missing"; exit 1; }
+          http_code=$(curl -sS -o resp.json -w "%{http_code}" -X PATCH \
+            -H "Authorization: token ${GIST_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/gists/${GIST_ID} \
+            -d @gist_payload.json)
+          echo "HTTP ${http_code}"
+          python - <<'PY'
+          import json; j=json.load(open("resp.json","r",encoding="utf-8"))
+          print("Gist now contains:", ", ".join(sorted(j.get("files",{}).keys())))
+          PY
+          test "$http_code" = "200" -o "$http_code" = "201"
