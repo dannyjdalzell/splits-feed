@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+import csv, re
+from pathlib import Path
+
+ROOT   = Path(__file__).resolve().parents[1]
+IN_P   = ROOT/"audit_out"/"boardroom_inputs.csv"
+OUT_P  = ROOT/"audit_out"/"boardroom_inputs.csv"   # in-place clean
+BAD    = re.compile(r"(Estimating resolution|SPORTSBOOK|Expanded Splits|Total Bets)", re.I)
+LEAGUES_OK = {"NFL","NCAAF","NBA","NCAAB","MLB","NHL","UFC/MMA","CFB","CBB"}
+
+def num(x):
+    try:
+        return float(str(x).replace("%","").strip())
+    except:
+        return None
+
+def keep(row):
+    # league sanity
+    lg = (row.get("league") or "").strip().upper()
+    if lg and lg not in LEAGUES_OK and lg != "UNKNOWN":
+        return False
+    # teams sanity
+    a = (row.get("away_team") or "")
+    h = (row.get("home_team") or "")
+    if not a or not h: return False
+    if BAD.search(a) or BAD.search(h): return False
+    # numeric sanity
+    tp = num(row.get("tickets_pct"))
+    hp = num(row.get("handle_pct"))
+    # allow one missing; drop crazy values
+    if tp is not None and not (0 <= tp <= 100): return False
+    if hp is not None and not (0 <= hp <= 100): return False
+    # line sanity (let strings pass, but drop obviously broken)
+    ln = (row.get("line") or "").strip()
+    if len(ln) > 8 and not re.search(r"[+-]?\d", ln):
+        return False
+    return True
+
+if not IN_P.exists():
+    print("[clean] boardroom_inputs.csv missing; nothing to clean")
+    raise SystemExit(0)
+
+with IN_P.open() as f:
+    rows = list(csv.DictReader(f))
+
+keep_rows = [r for r in rows if keep(r)]
+print(f"[clean] kept {len(keep_rows)} / {len(rows)} rows")
+
+if keep_rows:
+    with OUT_P.open("w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=keep_rows[0].keys())
+        w.writeheader()
+        w.writerows(keep_rows)
+else:
+    # write empty header to keep downstream stable
+    with OUT_P.open("w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys() if rows else
+                           ["timestamp","league","away_team","home_team","market","tickets_pct","handle_pct","line","source"])
+        w.writeheader()
