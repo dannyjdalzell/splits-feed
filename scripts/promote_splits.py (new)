@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import csv
+from pathlib import Path
+
+ROOT   = Path(__file__).resolve().parents[1]
+STAGED = ROOT/"audit_out"/"splits_staged.csv"
+BOARD  = ROOT/"audit_out"/"boardroom_inputs.csv"
+OUT    = ROOT/"splits.csv"
+
+def read_rows(p: Path):
+    if not p.exists():
+        return []
+    with p.open() as f:
+        return list(csv.DictReader(f))
+
+rows = read_rows(STAGED)
+src  = "staged"
+if not rows:
+    rows = read_rows(BOARD)
+    src  = "fallback"
+
+print(f"[promote] source={src} rows={len(rows)}")
+if rows:
+    with OUT.open("w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=rows[0].keys())
+        w.writeheader()
+        w.writerows(rows)
+else:
+    print("[promote] nothing to write; leaving splits.csv unchanged")
